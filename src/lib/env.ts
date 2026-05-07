@@ -21,6 +21,14 @@ const EnvSchema = z.object({
   // Auth
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
   JWT_ACCESS_TTL: z.string().default('7d'),
+  /**
+   * If true, OTP responses include `devCode` even when NODE_ENV=production.
+   * Use only on Netlify/staging for testing — never on a public production site.
+   */
+  OTP_TEST_EXPOSE_CODE: z
+    .string()
+    .optional()
+    .transform((v) => v === 'true' || v === '1'),
 
   // WhatsApp (optional in dev)
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),

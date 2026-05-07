@@ -23,8 +23,12 @@ function generateCode(): string {
 interface StartOtpResult {
   ok: boolean;
   channel: 'whatsapp' | 'sms';
-  /** Returned only in development to help testing — never in production. */
+  /** Returned in dev, or in production only if env OTP_TEST_EXPOSE_CODE=true (staging tests). */
   devCode?: string;
+}
+
+function shouldExposeOtpInResponse(): boolean {
+  return env.NODE_ENV !== 'production' || Boolean(env.OTP_TEST_EXPOSE_CODE);
 }
 
 /**
@@ -60,7 +64,7 @@ export async function startOtp(phoneE164: string): Promise<StartOtpResult> {
     return {
       ok: true,
       channel: 'whatsapp',
-      ...(env.NODE_ENV !== 'production' ? { devCode: code } : {}),
+      ...(shouldExposeOtpInResponse() ? { devCode: code } : {}),
     };
   }
 
@@ -70,7 +74,7 @@ export async function startOtp(phoneE164: string): Promise<StartOtpResult> {
     return {
       ok: true,
       channel: 'sms',
-      ...(env.NODE_ENV !== 'production' ? { devCode: code } : {}),
+      ...(shouldExposeOtpInResponse() ? { devCode: code } : {}),
     };
   }
 
@@ -78,7 +82,7 @@ export async function startOtp(phoneE164: string): Promise<StartOtpResult> {
   return {
     ok: false,
     channel: 'whatsapp',
-    ...(env.NODE_ENV !== 'production' ? { devCode: code } : {}),
+    ...(shouldExposeOtpInResponse() ? { devCode: code } : {}),
   };
 }
 

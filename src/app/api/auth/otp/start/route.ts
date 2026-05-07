@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     return ok({
       sent: true,
       channel: result.channel,
-      // In dev only, return the code so testing is easy
+      // Dev or OTP_TEST_EXPOSE_CODE staging: return the code for easier testing
       ...(result.devCode ? { devCode: result.devCode } : {}),
     });
   });

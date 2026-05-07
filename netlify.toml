@@ -1,0 +1,9 @@
+# Netlify secrets scanning treats “secret” env values as leak-sensitive.
+# These keys are flagged in the UI but their values legitimately appear in output:
+#   - NEXT_PUBLIC_* is bundled into client JS by design (not confidential).
+#   - FREE_SHIPPING_THRESHOLD_PKR (and defaults in env.ts) match public pricing logic;
+#     scanners also hit false positives in edge-runtime vendor blobs.
+#
+# https://ntl.fyi/configure-secrets-scanning
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_BRAND_NAME,FREE_SHIPPING_THRESHOLD_PKR"

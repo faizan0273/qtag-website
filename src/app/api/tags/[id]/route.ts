@@ -5,6 +5,8 @@ import { connectDB } from '@/lib/db';
 import mongoose from 'mongoose';
 import { updateTagSchema } from '@/lib/validation';
 import { updateProductDetails } from '@/lib/services/qr-product.service';
+export const dynamic = 'force-dynamic';
+
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   return safe(async () => {

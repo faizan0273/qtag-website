@@ -5,6 +5,8 @@ import { normalizePkPhone } from '@/lib/phone';
 import { rateLimit } from '@/lib/rate-limit';
 import { startOtp } from '@/lib/otp';
 import { env } from '@/lib/env';
+export const dynamic = 'force-dynamic';
+
 
 export async function POST(req: NextRequest) {
   return safe(async () => {

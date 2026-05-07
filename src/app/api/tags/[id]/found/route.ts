@@ -3,6 +3,8 @@ import { ok, bad, safe } from '@/lib/api-helpers';
 import { getCurrentUser } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { TagModel } from '@/models/Tag';
+export const dynamic = 'force-dynamic';
+
 
 export async function POST(_req: Request, { params }: { params: { id: string } }) {
   return safe(async () => {

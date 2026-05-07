@@ -4,6 +4,8 @@ import { connectDB } from '@/lib/db';
 import { isValidUid } from '@/lib/uid';
 import { z } from 'zod';
 import { scanQRHandler } from '@/lib/services/qr-product.service';
+export const dynamic = 'force-dynamic';
+
 
 const beaconSchema = z.object({
   uid: z.string(),

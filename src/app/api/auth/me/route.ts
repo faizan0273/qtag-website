@@ -1,5 +1,7 @@
 import { ok, bad, safe } from '@/lib/api-helpers';
 import { getCurrentUser } from '@/lib/auth';
+export const dynamic = 'force-dynamic';
+
 
 export async function GET() {
   return safe(async () => {

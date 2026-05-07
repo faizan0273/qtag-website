@@ -51,7 +51,30 @@ const EnvSchema = z.object({
   ADMIN_PHONES: z.string().default(''),
 });
 
-const parsed = EnvSchema.safeParse(process.env);
+/**
+ * During `next build`, Next may load API route modules before all Production env vars
+ * are available (or Vercel omits secrets from the build environment). Supply inert
+ * placeholders only for that phase so compilation succeeds; runtime uses real values.
+ */
+function withBuildTimeEnvDefaults(): NodeJS.ProcessEnv {
+  const envCopy = { ...process.env } as NodeJS.ProcessEnv;
+  if (process.env.NEXT_PHASE !== 'phase-production-build') {
+    return envCopy;
+  }
+
+  if (!envCopy.MONGODB_URI) {
+    envCopy.MONGODB_URI = 'mongodb://127.0.0.1:27017/__next_build_placeholder__';
+  }
+  if (!envCopy.JWT_SECRET || envCopy.JWT_SECRET.length < 32) {
+    envCopy.JWT_SECRET = '00000000000000000000000000000000';
+  }
+  if (!envCopy.NEXT_PUBLIC_APP_URL) {
+    envCopy.NEXT_PUBLIC_APP_URL = 'https://example.com';
+  }
+  return envCopy;
+}
+
+const parsed = EnvSchema.safeParse(withBuildTimeEnvDefaults());
 
 if (!parsed.success) {
   // eslint-disable-next-line no-console

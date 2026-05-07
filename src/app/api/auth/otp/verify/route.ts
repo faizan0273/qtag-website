@@ -7,6 +7,8 @@ import { connectDB } from '@/lib/db';
 import { UserModel } from '@/models/User';
 import { signSession, setSessionCookie } from '@/lib/auth';
 import { adminPhones } from '@/lib/env';
+export const dynamic = 'force-dynamic';
+
 
 export async function POST(req: NextRequest) {
   return safe(async () => {

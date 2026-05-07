@@ -3,6 +3,8 @@ import { getCurrentUser } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { OrderModel } from '@/models/Order';
 import mongoose from 'mongoose';
+export const dynamic = 'force-dynamic';
+
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   return safe(async () => {

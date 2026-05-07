@@ -6,6 +6,8 @@ import { connectDB } from '@/lib/db';
 import { createProduct } from '@/lib/services/qr-product.service';
 import { TagModel } from '@/models/Tag';
 import { tagPublicUrl, tagScanUrl, generateTagQrDataUrl } from '@/lib/qr';
+export const dynamic = 'force-dynamic';
+
 
 export async function POST(req: NextRequest) {
   return safe(async () => {

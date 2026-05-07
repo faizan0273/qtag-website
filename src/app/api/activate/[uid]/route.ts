@@ -7,6 +7,8 @@ import { connectDB } from '@/lib/db';
 import { TagModel } from '@/models/Tag';
 import { activateQR } from '@/lib/services/qr-product.service';
 import { normalizeProductType } from '@/lib/product-type';
+export const dynamic = 'force-dynamic';
+
 
 /**
  * Activation rules:

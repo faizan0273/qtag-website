@@ -8,6 +8,8 @@ import { TagModel } from '@/models/Tag';
 import { generateTagUid } from '@/lib/uid';
 import { quoteOrder } from '@/lib/constants';
 import { normalizePkPhone } from '@/lib/phone';
+export const dynamic = 'force-dynamic';
+
 
 /* ---------------------------- POST: create order ------------------------- */
 

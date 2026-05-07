@@ -5,6 +5,8 @@ import { markLostSchema } from '@/lib/validation';
 import { getCurrentUser } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { TagModel } from '@/models/Tag';
+export const dynamic = 'force-dynamic';
+
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   return safe(async () => {

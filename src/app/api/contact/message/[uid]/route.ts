@@ -14,6 +14,8 @@ import { rateLimit } from '@/lib/rate-limit';
 import { env } from '@/lib/env';
 import { notifyOwner } from '@/lib/whatsapp';
 import { normalizePkPhone } from '@/lib/phone';
+export const dynamic = 'force-dynamic';
+
 
 /**
  * The privacy relay.

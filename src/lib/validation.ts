@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PRODUCT_TYPES } from '@/lib/product-type';
+import { isShopSku } from '@/lib/shop-products';
 
 /* -------------------------------------------------------------------------- */
 /*  Auth                                                                      */
@@ -20,6 +21,10 @@ export const otpVerifySchema = z.object({
 
 export const createOrderSchema = z.object({
   quantity: z.number().int().min(1).max(20),
+  shopSku: z
+    .string()
+    .optional()
+    .refine((s) => s == null || s === '' || isShopSku(s), { message: 'Invalid shop product' }),
   shipping: z.object({
     fullName: z.string().min(2).max(80),
     phone: z.string().min(7).max(20),

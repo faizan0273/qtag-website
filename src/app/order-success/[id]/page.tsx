@@ -6,7 +6,7 @@ import { OrderModel } from '@/models/Order';
 import { getCurrentUser } from '@/lib/auth';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { formatPkr } from '@/lib/constants';
+import { formatPkr, orderLineTitleFromSku } from '@/lib/constants';
 import { env } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
@@ -25,6 +25,10 @@ export default async function OrderSuccessPage({
   if (!order) notFound();
   if (String(order.userId) !== user.id && user.role !== 'ADMIN') notFound();
 
+  const lineTitle = orderLineTitleFromSku(order.shopSku);
+  const tagsReserved =
+    typeof order.reservedTagCount === 'number' ? order.reservedTagCount : order.quantity;
+
   return (
     <div className="container-page py-12 md:py-20 max-w-3xl">
       {/* Success header */}
@@ -36,8 +40,11 @@ export default async function OrderSuccessPage({
         </div>
         <h1 className="font-display text-display-lg text-ink">Order placed!</h1>
         <p className="mt-3 text-ink-soft text-lg">
-          We're preparing your sticker{order.quantity > 1 ? 's' : ''}. Expected delivery in
-          2–3 working days.
+          We&apos;re preparing{' '}
+          <span className="font-medium text-ink">{lineTitle}</span>
+          {order.quantity > 1 ? ` (${order.quantity} units)` : ''}.{' '}
+          <span className="tnum">{tagsReserved}</span> QR tag UID{tagsReserved === 1 ? '' : 's'} reserved.
+          Expected delivery in 2–3 working days.
         </p>
       </div>
 
@@ -66,8 +73,14 @@ export default async function OrderSuccessPage({
             </div>
           </div>
           <div>
-            <div className="text-ink-muted mb-1">Quantity</div>
-            <div className="text-ink">{order.quantity} sticker{order.quantity > 1 ? 's' : ''}</div>
+            <div className="text-ink-muted mb-1">Lines</div>
+            <div className="text-ink">
+              {lineTitle}
+              <div className="mt-1 text-ink-soft text-xs">
+                {order.quantity} pack{order.quantity > 1 ? 's' : ''} · {tagsReserved} tag UID
+                {tagsReserved === 1 ? '' : 's'}
+              </div>
+            </div>
             <div className="text-ink-muted mt-3 mb-1">Status</div>
             <span className="inline-block px-2.5 py-0.5 rounded-full bg-brand-soft text-brand text-xs font-medium uppercase tracking-wider">
               {order.status}
@@ -81,9 +94,17 @@ export default async function OrderSuccessPage({
         <h2 className="font-display text-xl text-ink">What happens next</h2>
         <ol className="mt-5 space-y-4 text-ink-soft">
           {[
-            ['1', 'We print your sticker', 'Your sticker comes pre-printed with a unique QR code linked to this order.'],
+            [
+              '1',
+              'We prepare your order',
+              `Your items ship with unique QR codes — ${tagsReserved} tag UID${tagsReserved === 1 ? '' : 's'} linked to this order.`,
+            ],
             ['2', 'Courier delivers in 2–3 days', `Pay the rider ${formatPkr(order.totalPkr)} when it arrives.`],
-            ['3', 'Stick it & scan it', 'Open your phone camera, point at the sticker, and follow the activation steps. Takes 30 seconds.'],
+            [
+              '3',
+              'Activate each tag',
+              'Scan with your camera and finish activation from your dashboard.',
+            ],
           ].map(([n, title, body]) => (
             <li key={n} className="flex gap-4">
               <span className="grid place-items-center h-8 w-8 rounded-full bg-ink text-paper text-sm font-display shrink-0">{n}</span>
@@ -99,9 +120,10 @@ export default async function OrderSuccessPage({
       {/* Tag UIDs (for the user's reference) */}
       {order.tagUids?.length ? (
         <Card padding="lg" className="mt-6">
-          <h2 className="font-display text-xl text-ink">Your sticker codes</h2>
+          <h2 className="font-display text-xl text-ink">Your QR tag codes</h2>
           <p className="mt-2 text-ink-soft">
-            Each sticker has a unique code printed on it. After delivery, just scan the sticker — you don't need to memorise these.
+            Each tag has a unique code printed on it. After delivery, scan it to activate — you don&apos;t need
+            to memorise these.
           </p>
           <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
             {order.tagUids.map((uid) => (

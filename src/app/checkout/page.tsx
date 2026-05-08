@@ -5,7 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Field, Input, Select, Textarea } from '@/components/ui/Input';
-import { PRODUCT, PK_PROVINCES, formatPkr, quoteOrder } from '@/lib/constants';
+import {
+  orderLineTitleFromSku,
+  orderUnitPricePkr,
+  PK_PROVINCES,
+  formatPkr,
+  quoteOrder,
+} from '@/lib/constants';
+import { isShopSku } from '@/lib/shop-products';
 import { useCartStore } from '@/store/cart-store';
 import { useSessionStore } from '@/store/session-store';
 
@@ -23,7 +30,9 @@ export default function CheckoutPage() {
   const search = useSearchParams();
 
   const qty = useCartStore((s) => s.qty);
+  const shopSku = useCartStore((s) => s.shopSku);
   const setCartQty = useCartStore((s) => s.setQty);
+  const setCartSku = useCartStore((s) => s.setSku);
   const fetchSession = useSessionStore((s) => s.fetchSession);
   const fetchStatus = useSessionStore((s) => s.fetchStatus);
   const sessionUser = useSessionStore((s) => s.user);
@@ -34,11 +43,14 @@ export default function CheckoutPage() {
   const [pending, start] = useTransition();
 
   useEffect(() => {
+    const rawSku = search.get('sku');
+    if (rawSku && isShopSku(rawSku)) setCartSku(rawSku);
     const raw = search.get('qty');
-    if (raw == null || raw === '') return;
-    const q = parseInt(raw, 10);
-    if (q >= 1 && q <= 20) setCartQty(q);
-  }, [search, setCartQty]);
+    if (raw != null && raw !== '') {
+      const q = parseInt(raw, 10);
+      if (q >= 1 && q <= 20) setCartQty(q);
+    }
+  }, [search, setCartQty, setCartSku]);
 
   useEffect(() => {
     if (fetchStatus === 'idle') void fetchSession();
@@ -50,7 +62,9 @@ export default function CheckoutPage() {
     setShipping((s) => (s.phone ? s : { ...s, phone }));
   }, [sessionUser?.phone]);
 
-  const quote = useMemo(() => quoteOrder(qty, 'COD'), [qty]);
+  const quote = useMemo(() => quoteOrder(qty, 'COD', shopSku), [qty, shopSku]);
+  const lineTitle = orderLineTitleFromSku(shopSku);
+  const unitPkr = orderUnitPricePkr(shopSku);
 
   function update<K extends keyof typeof shipping>(key: K, value: (typeof shipping)[K]) {
     setShipping((s) => ({ ...s, [key]: value }));
@@ -66,6 +80,7 @@ export default function CheckoutPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             quantity: qty,
+            shopSku,
             shipping,
             paymentMethod: 'COD',
             notes,
@@ -208,10 +223,10 @@ export default function CheckoutPage() {
                 <span className="text-paper text-xs font-display tracking-widest">QR</span>
               </div>
               <div className="flex-1">
-                <div className="font-medium text-ink">{PRODUCT.name}</div>
+                <div className="font-medium text-ink">{lineTitle}</div>
                 <div className="text-sm text-ink-muted">Qty: {qty}</div>
               </div>
-              <div className="font-medium tnum">{formatPkr(PRODUCT.pricePkr * qty)}</div>
+              <div className="font-medium tnum">{formatPkr(unitPkr * qty)}</div>
             </div>
 
             <dl className="mt-5 space-y-2.5 text-sm">

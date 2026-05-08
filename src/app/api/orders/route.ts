@@ -6,8 +6,13 @@ import { connectDB } from '@/lib/db';
 import { OrderModel } from '@/models/Order';
 import { TagModel } from '@/models/Tag';
 import { generateTagUid } from '@/lib/uid';
-import { quoteOrder } from '@/lib/constants';
+import {
+  orderDefaultTagProductType,
+  orderTagsPerPack,
+  quoteOrder,
+} from '@/lib/constants';
 import { normalizePkPhone } from '@/lib/phone';
+import { isShopSku } from '@/lib/shop-products';
 export const dynamic = 'force-dynamic';
 
 
@@ -25,19 +30,28 @@ export async function POST(req: NextRequest) {
     const parsed = createOrderSchema.safeParse(json);
     if (!parsed.success) return fromZod(parsed.error);
 
-    const { quantity, shipping, paymentMethod, notes } = parsed.data;
+    const { quantity, shipping, paymentMethod, notes, shopSku: rawSku } = parsed.data;
+
+    const shopSku =
+      rawSku != null && rawSku !== '' && isShopSku(rawSku) ? rawSku : undefined;
+
+    const tagsPerPack = orderTagsPerPack(shopSku);
+    const totalTags = quantity * tagsPerPack;
+    if (totalTags > 100) {
+      return bad('VALIDATION_ERROR', 'Reduce quantity — this product reserves many tags per pack.');
+    }
 
     const phone = normalizePkPhone(shipping.phone);
     if (!phone) return bad('VALIDATION_ERROR', 'Shipping phone is invalid.');
 
-    const quote = quoteOrder(quantity, paymentMethod);
+    const quote = quoteOrder(quantity, paymentMethod, shopSku);
 
     await connectDB();
 
     // Reserve unique tag UIDs for this order. Try a few times if there's a
     // collision (extremely unlikely at 32^8 keyspace).
     const tagUids: string[] = [];
-    for (let i = 0; i < quantity; i++) {
+    for (let i = 0; i < totalTags; i++) {
       let attempts = 0;
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -57,6 +71,8 @@ export async function POST(req: NextRequest) {
     const order = await OrderModel.create({
       userId: user._id,
       quantity,
+      shopSku,
+      reservedTagCount: totalTags,
       subtotalPkr: quote.subtotalPkr,
       shippingPkr: quote.shippingPkr,
       codFeePkr: quote.codFeePkr,
@@ -68,12 +84,14 @@ export async function POST(req: NextRequest) {
       tagUids,
     });
 
+    const tagProductType = orderDefaultTagProductType(shopSku);
+
     // Create the corresponding Tag rows in PRINTED state
     await TagModel.insertMany(
       tagUids.map((uid) => ({
         uid,
         origin: 'ORDER' as const,
-        productType: 'CAR' as const,
+        productType: tagProductType,
         orderId: order._id,
         status: 'PRINTED' as const,
       })),

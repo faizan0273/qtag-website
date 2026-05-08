@@ -20,6 +20,10 @@ export interface IShippingAddress {
 export interface IOrder {
   userId: Types.ObjectId;
   quantity: number;
+  /** Catalogue SKU when ordering from /shop; omit for legacy Vehicle QR Sticker checkout. */
+  shopSku?: string;
+  /** QR tag count reserved (quantity × catalog tags-per-pack). Omitted on older orders. */
+  reservedTagCount?: number;
   subtotalPkr: number;
   shippingPkr: number;
   codFeePkr: number;
@@ -28,7 +32,7 @@ export interface IOrder {
   status: OrderStatus;
   shipping: IShippingAddress;
   notes?: string;
-  // Tag UIDs reserved for this order (length === quantity)
+  // Tag UIDs reserved for this order (length === reservedTagCount ?? quantity for legacy)
   tagUids: string[];
   // Courier / tracking — populated later when shipped
   courier?: string;
@@ -58,6 +62,8 @@ const OrderSchema = new Schema<IOrder>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     quantity: { type: Number, required: true, min: 1, max: 100 },
+    shopSku: { type: String, trim: true, index: true },
+    reservedTagCount: { type: Number, min: 1 },
     subtotalPkr: { type: Number, required: true, min: 0 },
     shippingPkr: { type: Number, required: true, min: 0 },
     codFeePkr: { type: Number, required: true, min: 0 },

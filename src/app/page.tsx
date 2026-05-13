@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { FaqAccordion } from '@/components/marketing/FaqAccordion';
@@ -106,23 +107,15 @@ export default function HomePage() {
             </div>
 
             <div className="md:col-span-5">
-              <div className="relative aspect-[4/5] max-w-md mx-auto">
-                {/* Decorative hero: QR tag on a simple surface */}
-                <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-brand/10 via-paper-card to-paper-line/40 border border-paper-line shadow-card overflow-hidden">
-                  <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-ink/5 to-transparent" />
-                  {/* Hint of a surface the tag sits on */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-ink to-ink-soft" />
-                  {/* QR tag card */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-paper-card border border-paper-line rounded-2xl p-4 w-44 shadow-cardHover rotate-[-3deg]">
-                    <div className="aspect-square bg-ink rounded-md grid place-items-center">
-                      <QRBlock />
-                    </div>
-                    <div className="mt-3 text-center">
-                      <div className="text-[10px] uppercase tracking-widest text-ink-muted">Scan me</div>
-                      <div className="font-display text-sm">{BRAND_NAME}</div>
-                    </div>
-                  </div>
-                </div>
+              <div className="relative aspect-[4/5] max-w-md mx-auto overflow-hidden rounded-[28px] border border-paper-line bg-paper-card shadow-card">
+                <Image
+                  src="/herosectionimage.jpg"
+                  alt={`${BRAND_NAME} QR safety tag preview`}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 768px) 40vw, 90vw"
+                  priority
+                />
               </div>
             </div>
           </div>
@@ -226,24 +219,6 @@ export default function HomePage() {
         <FaqAccordion items={FAQ_ACCORDION_ITEMS} />
       </section>
     </>
-  );
-}
-
-/* ---------- tiny inline SVG helpers for the hero --------------- */
-
-function QRBlock() {
-  // A stylized QR-looking pattern (decorative only, not a real QR)
-  const cells = Array.from({ length: 49 }, (_, i) => {
-    // deterministic pseudo pattern
-    const on = ((i * 7 + (i % 5) + ((i / 7) | 0)) % 3) !== 0;
-    return on;
-  });
-  return (
-    <div className="grid grid-cols-7 gap-[2px] p-3">
-      {cells.map((on, i) => (
-        <div key={i} className={on ? 'aspect-square bg-paper-card' : 'aspect-square bg-ink'} />
-      ))}
-    </div>
   );
 }
 

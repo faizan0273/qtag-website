@@ -6,7 +6,7 @@ import { formatPkPhone } from '@/lib/phone';
 export const dynamic = 'force-dynamic';
 
 const NAV_BASE = [
-  { href: '/dashboard', label: 'My stickers' },
+  { href: '/dashboard', label: 'My tags' },
   { href: '/dashboard/orders', label: 'Orders' },
   { href: '/dashboard/tags/new', label: 'Create tag' },
 ] as const;

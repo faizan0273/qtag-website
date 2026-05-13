@@ -8,8 +8,8 @@ export default function NotFound() {
       <div className="font-display text-7xl text-brand/20 mb-3">404</div>
       <h1 className="font-display text-display-md text-ink">We couldn't find that.</h1>
       <p className="mt-3 text-ink-soft">
-        The page or sticker you're looking for doesn't exist. If you scanned a QR
-        sticker, double-check that you scanned a real {BRAND_NAME} tag.
+        The page or link you&apos;re looking for doesn&apos;t exist. If you scanned a {BRAND_NAME} QR, double-check
+        that it&apos;s a real tag.
       </p>
       <div className="mt-8 flex justify-center gap-3">
         <Link href="/"><Button>Go home</Button></Link>

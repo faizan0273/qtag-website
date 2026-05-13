@@ -26,8 +26,8 @@ const config: Config = {
         warn: '#D97706',
       },
       fontFamily: {
-        display: ['var(--font-display)', 'serif'],
-        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         // Tighter, more editorial scale

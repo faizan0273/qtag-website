@@ -1,5 +1,5 @@
 /**
- * Scano multi-product QR types (single Tag collection, discriminated by productType).
+ * Qtag multi-product QR types (single Tag collection, discriminated by productType).
  */
 
 export const PRODUCT_TYPES = ['CAR', 'PET', 'BAG', 'PROPERTY', 'ITEM'] as const;

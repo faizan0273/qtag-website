@@ -27,7 +27,7 @@ function assetLabel(pt: ProductType): string {
     case 'ITEM':
       return 'item';
     default:
-      return 'vehicle';
+      return 'tag';
   }
 }
 
@@ -97,8 +97,8 @@ export function TagActions({
       <Card padding="md">
         <h2 className="font-display text-lg text-ink mb-2">Lost mode is on</h2>
         <p className="text-sm text-ink-soft mb-5">
-          The public scan page highlights that this{' '}
-          {productType === 'CAR' ? 'vehicle' : productType.toLowerCase()} may be missing. Mark it once it is safe again.
+          The public scan page highlights that this {assetLabel(productType)} may be missing. Mark it once it is safe
+          again.
         </p>
         <Button
           fullWidth
@@ -161,7 +161,7 @@ export function TagActions({
             id="message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Please call me — thank you."
+            placeholder="Please call me, thank you."
             maxLength={280}
             rows={3}
           />

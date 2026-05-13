@@ -11,11 +11,11 @@ type Step = 1 | 2 | 3;
 
 const HINTS: Record<ProductType, string> = {
   CAR:
-    'You can skip this flow and buy windshield stickers instead — dashboard tags are mainly for pets, luggage, shops, etc.',
-  PET: 'Breed mix, distinguishing marks, temperament — whatever helps a finder recognize them.',
+    'Prefer a ready-made physical tag? Use the shop, this flow is ideal for pets, bags, property, and custom digital tags.',
+  PET: 'Breed mix, distinguishing marks, temperament, whatever helps a finder recognize them.',
   BAG: 'Colour, luggage brand tag, initials on the luggage tag ribbon…',
-  PROPERTY: 'Visible sign text, storefront hours — keep it informational only.',
-  ITEM: 'Laptop sticker, stroller tag, toolbox — explain what carries this QR.',
+  PROPERTY: 'Visible sign text, storefront hours, keep it informational only.',
+  ITEM: 'Laptop, stroller, toolbox, helmet, describe what carries this QR.',
 };
 
 export default function CreateNewTagPage() {
@@ -76,7 +76,7 @@ export default function CreateNewTagPage() {
     if (!created) return;
     const a = document.createElement('a');
     a.href = created.qrDataUrl;
-    a.download = `scano-tag-${created.uid}.png`;
+    a.download = `qtag-tag-${created.uid}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -90,8 +90,8 @@ export default function CreateNewTagPage() {
         </div>
         <h1 className="mt-2 font-display text-display-md text-ink">Create a QR identity</h1>
         <p className="mt-2 text-ink-soft text-sm leading-relaxed">
-          Pick a product type, tell us what it represents, then download the QR. Physical Car Tag stickers from the shop
-          still use the classic flow — this wizard is for digital-first tags.
+          Pick a product type, say what it represents, then download the QR. Physical tags from the shop use the same
+          activation flow, this wizard is for digital first tags you create here.
         </p>
       </div>
 
@@ -155,7 +155,7 @@ export default function CreateNewTagPage() {
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Keep it informational — phones stay private unless you expose them deliberately."
+                placeholder="Keep it informational, phones stay private unless you expose them deliberately."
                 maxLength={500}
               />
             </Field>
@@ -191,8 +191,8 @@ export default function CreateNewTagPage() {
             </Link>
           </div>
           <p className="text-xs text-ink-muted">
-            The QR opens <span className="font-mono">/scan/{created.uid}</span> — classic{' '}
-            <span className="font-mono">/t/</span> links still work for windshield stickers from the shop.
+            The QR opens <span className="font-mono">/scan/{created.uid}</span>, classic{' '}
+            <span className="font-mono">/t/</span> links stay valid for any physical tag shipped with that URL pattern.
           </p>
         </Card>
       ) : null}

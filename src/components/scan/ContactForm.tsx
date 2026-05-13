@@ -21,11 +21,11 @@ function copy(productType: ProductType, isLost: boolean): { headline: string; pl
             placeholder:
               'Hi! I spotted a pet matching this profile near … (colour, landmarks, approximate time)',
             geoHint:
-              'Helps reunite pets faster — only used once for this message.',
+              'Helps reunite pets faster, only used once for this message.',
           }
         : {
             headline: 'Send a gentle message',
-            placeholder: 'Hi — I scanned this tag near … Quick question:',
+            placeholder: 'Hi, I scanned this tag near … Quick question:',
             geoHint: undefined,
           };
     case 'BAG':
@@ -37,41 +37,41 @@ function copy(productType: ProductType, isLost: boolean): { headline: string; pl
           }
         : {
             headline: 'Leave a secure note',
-            placeholder: 'Hi — spotted this tag on a bag nearby … ',
+            placeholder: 'Hi, spotted this tag on a bag nearby … ',
             geoHint: undefined,
           };
     case 'PROPERTY':
       return isLost
         ? {
-            headline: 'Urgent · property contact',
+            headline: 'Urgent, property contact',
             placeholder: 'Please describe why you scanned (delivery, neighbourhood watch, inquiry)…',
           }
         : {
             headline: 'Message property',
-            placeholder: 'Hi — I scanned this QR and wanted to ask about … ',
+            placeholder: 'Hi, I scanned this QR and wanted to ask about … ',
           };
     case 'ITEM':
       return isLost
         ? {
             headline: 'I found this item',
             placeholder:
-              'Hi! I located something that looks like yours — describing colour, markings, and where:',
+              'Hi! I located something that looks like yours, describing colour, markings, and where:',
           }
         : {
             headline: 'Message about this item',
-            placeholder: 'Hi — about the item paired with this tag:',
+            placeholder: 'Hi, about the item paired with this tag:',
           };
     default:
       return isLost
         ? {
-            headline: 'I found this vehicle',
-            placeholder: "Hi! I think I've found this vehicle near…",
-            geoHint:
-              'Helps the owner find their vehicle quickly. Used only for this message.',
+            headline: 'I need the owner',
+            placeholder:
+              'Hi, I scanned this tag and I’m reaching you about a safety or location issue (please describe):',
+            geoHint: 'Helps the owner respond quickly. Used only for this message.',
           }
         : {
             headline: 'Message the owner',
-            placeholder: 'Hi, your car is blocking mine at…',
+            placeholder: 'Hi, I scanned this tag and wanted to reach you about…',
             geoHint: undefined,
           };
   }
@@ -138,13 +138,13 @@ export function ContactForm({ uid, isLost, productType }: Props) {
   }
 
   return (
-    <div id="scano-contact" className="scroll-mt-8">
+    <div id="qtag-contact" className="scroll-mt-8">
       <form onSubmit={submit} className="space-y-4">
         <h2 className="font-display text-lg text-ink">{headline}</h2>
 
-        <Field label="Your message" htmlFor="scano-contact-body">
+        <Field label="Your message" htmlFor="qtag-contact-body">
           <Textarea
-            id="scano-contact-body"
+            id="qtag-contact-body"
             rows={4}
             maxLength={500}
             value={body}

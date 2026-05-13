@@ -1,10 +1,10 @@
-# QRsaathi — Vehicle QR (MVP)
+# Qtag, smart QR tags (MVP)
 
-A Pakistan-focused web app where vehicle owners buy a QR sticker, activate it on their car, and let anyone who finds the car contact them on WhatsApp **without ever exposing the owner's phone number**.
+A Pakistan-focused web app for **smart QR tags** (vehicle, medical, lost & found, and more). People reach owners on WhatsApp **without exposing private numbers** unless the owner chooses to share.
 
-**Stack:** Next.js 14 (App Router) · TypeScript · MongoDB (Mongoose) · TailwindCSS · WhatsApp Cloud API · JWT auth.
+**Stack:** Next.js 14 (App Router), TypeScript, MongoDB (Mongoose), TailwindCSS, WhatsApp Cloud API, JWT auth.
 
-This is a single-product MVP. One SKU: a windshield QR sticker for vehicles.
+This MVP centres on physical QR tags and activation; the shop lists multiple safety-oriented SKUs.
 
 ---
 
@@ -52,7 +52,7 @@ pnpm dev
 ## Folder Structure
 
 ```
-qrsaathi-vehicle/
+qtag/                               # project root (your checkout folder may differ)
 ├── src/
 │   ├── app/
 │   │   ├── (marketing)/             # public pages
@@ -122,10 +122,10 @@ qrsaathi-vehicle/
 
 - **Backend = Next.js Route Handlers.** Everything in `src/app/api/**/route.ts`. No separate server.
 - **Database access** is centralized in `src/lib/db.ts` with a cached connection (Next.js hot-reload safe).
-- **All secrets via env**, validated at boot in `src/lib/env.ts` — the app refuses to start if anything is missing or malformed.
+- **All secrets via env**, validated at boot in `src/lib/env.ts`, and the app refuses to start if anything is missing or malformed.
 - **Auth = JWT in httpOnly cookie.** Set on `/api/auth/otp/verify`. Read in middleware and `getCurrentUser()`.
 - **Privacy is a hard rule, not a feature.** The owner's phone number never leaves the server in API responses to public endpoints. All masking happens server-side.
-- **WhatsApp is pluggable.** `src/lib/whatsapp.ts` exports `sendWhatsAppMessage()` — the rest of the codebase doesn't know whether it's using Meta, Wati, or a stub.
+- **WhatsApp is pluggable.** `src/lib/whatsapp.ts` exports `sendWhatsAppMessage()`, and the rest of the codebase doesn't know whether it's using Meta, Wati, or a stub.
 
 ---
 
@@ -133,10 +133,10 @@ qrsaathi-vehicle/
 
 | # | Flow | Routes involved |
 |---|---|---|
-| 1 | Buy a sticker | `/shop` → `/checkout` → `POST /api/orders` → `/order-success/[id]` |
+| 1 | Shop tags | `/shop` → `/checkout` → `POST /api/orders` → `/order-success/[id]` |
 | 2 | Login | `/login` → `POST /api/auth/otp/start` → `/verify` → `POST /api/auth/otp/verify` |
 | 3 | Activate | scan → `/t/[uid]` (sees "not activated") → `/t/[uid]/activate` → `POST /api/tags/[uid]/activate` |
-| 4 | Public scan | `/t/[uid]` → see vehicle details, hit "Message Owner" → `POST /api/contact/message/[uid]` → owner gets WhatsApp |
+| 4 | Public scan | `/t/[uid]` → see tag profile, message owner → `POST /api/contact/message/[uid]` → owner gets WhatsApp |
 | 5 | Lost mode | dashboard → toggle lost → `POST /api/tags/[id]/lost` → public page changes |
 
 ---
@@ -146,11 +146,11 @@ qrsaathi-vehicle/
 - [ ] Set strong `JWT_SECRET` (≥32 random bytes).
 - [ ] Use a managed MongoDB (Atlas / Railway).
 - [ ] Replace in-memory rate limiter with Redis (`src/lib/rate-limit.ts` has the swap point marked).
-- [ ] Get Meta WhatsApp templates approved (`qrsaathi_otp`, `qrsaathi_scan_alert`).
+- [ ] Get Meta WhatsApp templates approved (`qtag_otp`, `qtag_scan_alert`).
 - [ ] Add Sentry for error monitoring.
 - [ ] Add a real payment gateway (Safepay recommended).
 - [ ] Add admin role + admin dashboard.
-- [ ] Run `pnpm build` clean — no TS errors, no ESLint errors.
+- [ ] Run `pnpm build` clean, with no TS errors and no ESLint errors.
 - [ ] Test full flow on a real Pakistani phone with WhatsApp.
 
 ---

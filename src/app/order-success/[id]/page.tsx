@@ -13,8 +13,10 @@ export const dynamic = 'force-dynamic';
 
 export default async function OrderSuccessPage({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams?: { paid?: string; payment?: string; reason?: string; code?: string };
 }) {
   const user = await getCurrentUser();
   if (!user) notFound();
@@ -29,8 +31,31 @@ export default async function OrderSuccessPage({
   const tagsReserved =
     typeof order.reservedTagCount === 'number' ? order.reservedTagCount : order.quantity;
 
+  const paymentFailed = searchParams?.payment === 'failed';
+  const paymentJustPaid =
+    searchParams?.paid === '1' || order.paymentStatus === 'PAID';
+  const isJazzCash = order.paymentMethod === 'JAZZCASH';
+
   return (
     <div className="container-page py-12 md:py-20 max-w-3xl">
+      {paymentFailed ? (
+        <div className="mb-8 rounded-xl border border-danger/30 bg-danger/5 p-4 text-sm text-danger">
+          <div className="font-medium">Payment didn&apos;t go through.</div>
+          <div className="mt-1 text-danger/90">
+            {order.paymentResponseMessage
+              ? order.paymentResponseMessage
+              : 'JazzCash couldn\'t complete the transaction.'}
+            {searchParams?.code ? ` (code ${searchParams.code})` : ''}
+          </div>
+          <a
+            href={`/payments/jazzcash/${String(order._id)}`}
+            className="inline-block mt-3 underline font-medium"
+          >
+            Retry payment →
+          </a>
+        </div>
+      ) : null}
+
       {/* Success header */}
       <div className="text-center">
         <div className="inline-grid place-items-center h-16 w-16 rounded-full bg-success/10 text-success mb-5">
@@ -38,13 +63,18 @@ export default async function OrderSuccessPage({
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <h1 className="font-display text-display-lg text-ink">Order placed!</h1>
+        <h1 className="font-display text-display-lg text-ink">
+          {isJazzCash && paymentJustPaid ? 'Payment received!' : 'Order placed!'}
+        </h1>
         <p className="mt-3 text-ink-soft text-lg">
+          {isJazzCash && paymentJustPaid ? (
+            <>Thanks, your JazzCash payment is confirmed. </>
+          ) : null}
           We&apos;re preparing{' '}
           <span className="font-medium text-ink">{lineTitle}</span>
           {order.quantity > 1 ? ` (${order.quantity} units)` : ''}.{' '}
           <span className="tnum">{tagsReserved}</span> QR tag UID{tagsReserved === 1 ? '' : 's'} reserved.
-          Expected delivery in 2–3 working days.
+          Expected delivery in 2 to 3 working days.
         </p>
       </div>
 
@@ -56,8 +86,27 @@ export default async function OrderSuccessPage({
             <div className="font-mono text-ink mt-1 break-all">{String(order._id)}</div>
           </div>
           <div className="text-right">
-            <div className="text-sm text-ink-muted">Total (COD)</div>
+            <div className="text-sm text-ink-muted">
+              Total ({isJazzCash ? 'JazzCash' : 'COD'})
+            </div>
             <div className="font-display text-2xl tnum mt-1">{formatPkr(order.totalPkr)}</div>
+            {isJazzCash ? (
+              <div className="mt-1 text-xs">
+                {order.paymentStatus === 'PAID' ? (
+                  <span className="inline-block px-2 py-0.5 rounded-full bg-success/10 text-success font-medium uppercase tracking-wider">
+                    Paid
+                  </span>
+                ) : order.paymentStatus === 'PENDING' ? (
+                  <span className="inline-block px-2 py-0.5 rounded-full bg-brand-soft text-brand font-medium uppercase tracking-wider">
+                    Awaiting payment
+                  </span>
+                ) : (
+                  <span className="inline-block px-2 py-0.5 rounded-full bg-danger/10 text-danger font-medium uppercase tracking-wider">
+                    {order.paymentStatus ?? 'Failed'}
+                  </span>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -97,9 +146,15 @@ export default async function OrderSuccessPage({
             [
               '1',
               'We prepare your order',
-              `Your items ship with unique QR codes — ${tagsReserved} tag UID${tagsReserved === 1 ? '' : 's'} linked to this order.`,
+              `Your items ship with unique QR codes, ${tagsReserved} tag UID${tagsReserved === 1 ? '' : 's'} linked to this order.`,
             ],
-            ['2', 'Courier delivers in 2–3 days', `Pay the rider ${formatPkr(order.totalPkr)} when it arrives.`],
+            [
+              '2',
+              'Courier delivers in 2 to 3 days',
+              isJazzCash
+                ? 'No payment due on delivery, your order is already paid.'
+                : `Pay the rider ${formatPkr(order.totalPkr)} when it arrives.`,
+            ],
             [
               '3',
               'Activate each tag',
@@ -122,7 +177,7 @@ export default async function OrderSuccessPage({
         <Card padding="lg" className="mt-6">
           <h2 className="font-display text-xl text-ink">Your QR tag codes</h2>
           <p className="mt-2 text-ink-soft">
-            Each tag has a unique code printed on it. After delivery, scan it to activate — you don&apos;t need
+            Each tag has a unique code printed on it. After delivery, scan it to activate. You don&apos;t need
             to memorise these.
           </p>
           <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -147,7 +202,7 @@ export default async function OrderSuccessPage({
           <Button size="lg">Go to dashboard</Button>
         </Link>
         <Link href="/shop">
-          <Button size="lg" variant="secondary">Buy another</Button>
+          <Button size="lg" variant="secondary">Shop more tags</Button>
         </Link>
       </div>
     </div>

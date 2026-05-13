@@ -21,7 +21,7 @@ function intFromEnv(
 
 const PublicEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
-  NEXT_PUBLIC_BRAND_NAME: z.string().default('Scano'),
+  NEXT_PUBLIC_BRAND_NAME: z.string().default('Qtag'),
   PRODUCT_PRICE_PKR: z.number().int().positive(),
   SHIPPING_FEE_PKR: z.number().int().nonnegative(),
   FREE_SHIPPING_THRESHOLD_PKR: z.number().int().nonnegative(),

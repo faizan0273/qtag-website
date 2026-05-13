@@ -1,22 +1,29 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { BRAND_NAME } from '@/lib/brand';
+import { BRAND_LOGO_SRC, BRAND_NAME } from '@/lib/brand';
 
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-paper-line bg-paper">
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 grid gap-8 md:grid-cols-4 text-sm">
         <div>
-          <div className="font-display text-lg tracking-tight">{BRAND_NAME}</div>
+          <Image
+            src={BRAND_LOGO_SRC}
+            alt=""
+            width={120}
+            height={36}
+            className="h-8 w-auto max-h-8 object-contain object-left"
+          />
           <p className="mt-2 text-ink-muted max-w-xs">
-            A simple QR sticker that helps strangers reach you about your vehicle —
-            without ever seeing your phone number.
+            Smart safety in Pakistan: privacy first QR tags, reach people when it matters without exposing private
+            numbers.
           </p>
         </div>
 
         <div>
           <div className="font-medium text-ink mb-3">Product</div>
           <ul className="space-y-2 text-ink-muted">
-            <li><Link href="/shop" className="hover:text-ink">Buy a sticker</Link></li>
+            <li><Link href="/shop" className="hover:text-ink">Shop tags</Link></li>
             <li><Link href="/#how" className="hover:text-ink">How it works</Link></li>
             <li><Link href="/#faq" className="hover:text-ink">FAQ</Link></li>
           </ul>
@@ -35,7 +42,7 @@ export function Footer() {
           <div className="font-medium text-ink mb-3">Help</div>
           <ul className="space-y-2 text-ink-muted">
             <li><a href="https://wa.me/" className="hover:text-ink">WhatsApp support</a></li>
-            <li><a href="mailto:hello@qrsaathi.pk" className="hover:text-ink">hello@qrsaathi.pk</a></li>
+            <li><a href="mailto:hello@qtag.pk" className="hover:text-ink">hello@qtag.pk</a></li>
           </ul>
         </div>
       </div>

@@ -51,7 +51,7 @@ export default async function TagDetailPage({
     <div>
       {searchParams.activated ? (
         <div className="mb-6 px-4 py-3 rounded-xl bg-success/10 text-success">
-          ✅ Sticker activated! Test it by scanning the QR with your phone camera.
+          ✅ Tag activated! Test it by scanning the QR with your phone camera.
         </div>
       ) : null}
 
@@ -99,7 +99,7 @@ export default async function TagDetailPage({
             <h2 className="font-display text-lg text-ink mb-4">Public links</h2>
             <div className="space-y-4">
               <div>
-                <div className="text-xs uppercase tracking-wider text-ink-muted mb-1">Classic /t (stickers)</div>
+                <div className="text-xs uppercase tracking-wider text-ink-muted mb-1">Classic /t (physical tags)</div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-paper border border-paper-line">
                   <code className="text-sm tnum text-ink-soft truncate flex-1">{legacyUrl}</code>
                   <a
@@ -128,8 +128,8 @@ export default async function TagDetailPage({
               </div>
             </div>
             <p className="mt-3 text-xs text-ink-muted">
-              Both URLs resolve the same tag — old stickers keep pointing at <span className="font-mono">/t/</span> while
-              newer digital tags prefer <span className="font-mono">/scan/</span>.
+              Both URLs resolve the same tag, older printed codes use <span className="font-mono">/t/</span> while
+              digital tags prefer <span className="font-mono">/scan/</span>.
             </p>
           </Card>
 
@@ -150,7 +150,7 @@ export default async function TagDetailPage({
                     <div className="mt-1 text-xs text-ink-muted">
                       {new Date(m.createdAt).toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })}
                       {' · '}
-                      {m.delivered ? 'Delivered to your WhatsApp' : 'Delivery failed — check WhatsApp setup'}
+                      {m.delivered ? 'Delivered to your WhatsApp' : 'Delivery failed, check WhatsApp setup'}
                     </div>
                   </li>
                 ))}
@@ -173,7 +173,7 @@ export default async function TagDetailPage({
                       {new Date(s.createdAt).toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })}
                     </span>
                     <span className="text-xs text-ink-muted truncate max-w-[40%] tnum">
-                      {s.ip ?? '—'}
+                      {s.ip ?? 'n/a'}
                     </span>
                   </li>
                 ))}

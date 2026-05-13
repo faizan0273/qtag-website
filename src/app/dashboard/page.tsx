@@ -59,10 +59,10 @@ export default async function DashboardHome() {
     <div>
       <div className="flex items-end justify-between mb-6 gap-4">
         <div>
-          <h1 className="font-display text-display-md text-ink">My stickers</h1>
+          <h1 className="font-display text-display-md text-ink">My tags</h1>
           <p className="mt-1 text-ink-soft">
             {tags.length === 0
-              ? "You don't have any active stickers yet."
+              ? "You don't have any active tags yet."
               : `${tags.filter((t) => t.status !== 'PRINTED').length} active, ${tags.filter((t) => t.status === 'LOST').length} lost`}
           </p>
         </div>
@@ -71,7 +71,7 @@ export default async function DashboardHome() {
             <Button variant="secondary">Create tag</Button>
           </Link>
           <Link href="/shop">
-            <Button>Buy a sticker</Button>
+            <Button>Shop tags</Button>
           </Link>
         </div>
       </div>
@@ -82,12 +82,12 @@ export default async function DashboardHome() {
           <div className="flex flex-wrap items-start gap-4 justify-between">
             <div>
               <h2 className="font-display text-lg text-ink">
-                You have {pendingActivationUids.length} sticker
+                You have {pendingActivationUids.length} physical tag
                 {pendingActivationUids.length > 1 ? 's' : ''} ready to activate
               </h2>
               <p className="mt-1 text-sm text-ink-soft">
-                Scan the QR with your phone (same as on the physical sticker), or open “Activate” from a code
-                below. Your sticker may still be on the way — you can activate early using the QR on this page.
+                Scan the QR with your phone (same code printed on your tag), or open “Activate” from a code below.
+                Your order may still be on the way, you can activate early using the QR on this page.
               </p>
             </div>
           </div>
@@ -119,7 +119,7 @@ export default async function DashboardHome() {
 
           {pendingActivationUids.length > 6 ? (
             <p className="mt-4 text-xs text-ink-muted">
-              +{pendingActivationUids.length - 6} more sticker{pendingActivationUids.length - 6 > 1 ? 's' : ''} — codes:{' '}
+              +{pendingActivationUids.length - 6} more tag{pendingActivationUids.length - 6 > 1 ? 's' : ''}, codes:{' '}
               {pendingActivationUids.slice(6).join(', ')}
             </p>
           ) : null}
@@ -171,7 +171,7 @@ export default async function DashboardHome() {
       )}
 
       <p className="mt-8 text-xs text-ink-muted">
-        Stickers use <span className="font-mono">{env.NEXT_PUBLIC_APP_URL}/t/&lt;code&gt;</span> · digital tags use{' '}
+        Physical tags use <span className="font-mono">{env.NEXT_PUBLIC_APP_URL}/t/&lt;code&gt;</span>, digital tags use{' '}
         <span className="font-mono">/scan/&lt;code&gt;</span> (same code, richer profile shells).
       </p>
     </div>
@@ -181,15 +181,17 @@ export default async function DashboardHome() {
 function EmptyState() {
   return (
     <Card padding="lg" className="text-center">
-      <div className="text-5xl mb-3">🚗</div>
-      <h2 className="font-display text-xl text-ink">No active stickers yet</h2>
-      <p className="mt-2 text-ink-soft">Buy a sticker for your car, or create a digital tag for pets, bags, and more.</p>
+      <div className="text-5xl mb-3">🏷️</div>
+      <h2 className="font-display text-xl text-ink">No active tags yet</h2>
+      <p className="mt-2 text-ink-soft">
+        Shop physical tags for bags, vehicles, entryways, and more, or create a free digital tag from your dashboard.
+      </p>
       <div className="flex flex-wrap gap-3 justify-center mt-5">
         <Link href="/dashboard/tags/new">
           <Button variant="secondary">Create tag</Button>
         </Link>
         <Link href="/shop">
-          <Button>Buy a sticker</Button>
+          <Button>Shop tags</Button>
         </Link>
       </div>
     </Card>

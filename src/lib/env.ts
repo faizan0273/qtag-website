@@ -13,7 +13,7 @@ const EnvSchema = z.object({
 
   // App
   NEXT_PUBLIC_APP_URL: z.string().url(),
-  NEXT_PUBLIC_BRAND_NAME: z.string().default('Scano'),
+  NEXT_PUBLIC_BRAND_NAME: z.string().default('Qtag'),
 
   // Database
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
@@ -33,8 +33,8 @@ const EnvSchema = z.object({
   // WhatsApp (optional in dev)
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
   WHATSAPP_ACCESS_TOKEN: z.string().optional(),
-  WHATSAPP_OTP_TEMPLATE: z.string().default('qrsaathi_otp'),
-  WHATSAPP_SCAN_ALERT_TEMPLATE: z.string().default('qrsaathi_scan_alert'),
+  WHATSAPP_OTP_TEMPLATE: z.string().default('qtag_otp'),
+  WHATSAPP_SCAN_ALERT_TEMPLATE: z.string().default('qtag_scan_alert'),
   WHATSAPP_TEMPLATE_LANG: z.string().default('en'),
 
   // SMS (optional)
@@ -57,6 +57,20 @@ const EnvSchema = z.object({
 
   // Admin bootstrap
   ADMIN_PHONES: z.string().default(''),
+
+  // JazzCash (HTTP Post / Page Redirection)
+  // Optional so the app still boots in environments without JazzCash configured.
+  JAZZCASH_MERCHANT_ID: z.string().optional(),
+  JAZZCASH_PASSWORD: z.string().optional(),
+  JAZZCASH_INTEGRITY_SALT: z.string().optional(),
+  JAZZCASH_USE_SANDBOX: z
+    .string()
+    .optional()
+    .transform((v) => (v == null ? true : !(v === 'false' || v === '0'))),
+  /** Override; if empty we pick sandbox/prod based on JAZZCASH_USE_SANDBOX. */
+  JAZZCASH_POST_URL: z.string().optional(),
+  /** Where JazzCash POSTs the result. If empty, derived from NEXT_PUBLIC_APP_URL. */
+  JAZZCASH_RETURN_URL: z.string().optional(),
 });
 
 /**
@@ -95,6 +109,11 @@ export const env = parsed.data;
 /** True if WhatsApp credentials are configured (i.e. we should send real messages). */
 export const isWhatsAppConfigured = Boolean(
   env.WHATSAPP_ACCESS_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID,
+);
+
+/** True if JazzCash credentials are configured. */
+export const isJazzCashConfigured = Boolean(
+  env.JAZZCASH_MERCHANT_ID && env.JAZZCASH_PASSWORD && env.JAZZCASH_INTEGRITY_SALT,
 );
 
 /** Phones that should be elevated to ADMIN on first login. */

@@ -15,10 +15,10 @@ export function ScanActionsBar({ telHref, whatsappHref }: Props) {
   if (!telHref && !whatsappHref) return null;
 
   function reportFoundClick() {
-    const el = document.getElementById('scano-contact');
+    const el = document.getElementById('qtag-contact');
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.setTimeout(() => {
-      const ta = document.getElementById('scano-contact-body');
+      const ta = document.getElementById('qtag-contact-body');
       ta?.focus();
     }, 400);
   }
@@ -47,7 +47,7 @@ export function ScanActionsBar({ telHref, whatsappHref }: Props) {
         </button>
       </div>
       <p className="text-xs text-ink-muted text-center">
-        Tap call or WhatsApp only if you're comfortable reaching out directly — your number stays private unless you choose to share it below.
+        Tap call or WhatsApp only if you're comfortable reaching out directly, your number stays private unless you choose to share it below.
       </p>
     </div>
   );

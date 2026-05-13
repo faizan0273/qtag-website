@@ -15,9 +15,9 @@ function lostBannerLabel(pt: ProductType): { title: string; emoji: string } {
     case 'PET':
       return { title: 'Pet lost?', emoji: '🐾' };
     case 'BAG':
-      return { title: 'Lost bag / item', emoji: '🎒' };
+      return { title: 'Lost bag or item', emoji: '🎒' };
     case 'PROPERTY':
-      return { title: 'Alert — property', emoji: '🏠' };
+      return { title: 'Alert, property', emoji: '🏠' };
     case 'ITEM':
       return { title: 'Lost item', emoji: '🏷️' };
     default:
@@ -86,7 +86,7 @@ export async function ScanPublicPage({ slug }: { slug: string }) {
             )}
           </p>
           <Link href={`/login?next=${encodeURIComponent(`/t/${slug}/activate`)}`} className="block mt-6">
-            <Button size="lg">I'm the owner — activate it</Button>
+            <Button size="lg">I'm the owner, activate it</Button>
           </Link>
         </div>
       </Frame>
@@ -137,7 +137,7 @@ export async function ScanPublicPage({ slug }: { slug: string }) {
       />
 
       <div className="mt-8 pt-6 border-t border-paper-line text-center">
-        <div className="text-sm text-ink-muted">Safe profile · {productTypeLabel(view.productType)}</div>
+        <div className="text-sm text-ink-muted">Safe profile, {productTypeLabel(view.productType)}</div>
         <div className="mt-1 font-display text-xl text-ink">{view.publicName ?? 'Owner'}</div>
         <div className="mt-2 font-mono tnum text-ink-soft">{view.ownerPhoneMasked}</div>
         <p className="mt-2 text-xs text-ink-muted">
@@ -153,7 +153,7 @@ export async function ScanPublicPage({ slug }: { slug: string }) {
 
       {isLost && view.rewardPkr ? (
         <div className="mt-6 px-4 py-3 rounded-xl bg-brand-soft text-brand text-center">
-          <div className="text-xs uppercase tracking-widest">Thank-you reward</div>
+          <div className="text-xs uppercase tracking-widest">Thank you reward</div>
           <div className="font-display text-xl tnum mt-0.5">{formatPkr(view.rewardPkr)}</div>
         </div>
       ) : null}

@@ -53,7 +53,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="font-display text-display-md text-ink">Admin · Scano analytics</h1>
+        <h1 className="font-display text-display-md text-ink">Admin · Qtag analytics</h1>
         <p className="mt-2 text-ink-soft text-sm">
           Thirty-day rolling scan counts (after model upgrade) grouped by QR product type plus currently active identities.
         </p>

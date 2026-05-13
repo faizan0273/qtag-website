@@ -42,7 +42,7 @@ export function ActivateTagForm({
       .then((j) => {
         if (j.ok && j.data?.user?.name && !publicName) setPublicName(j.data.user.name);
       })
-      .catch(() => {});
+      .catch(() => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -96,16 +96,16 @@ export function ActivateTagForm({
   const head =
     origin === 'DASHBOARD' ? (
       <>
-        <div className="text-sm text-brand font-medium uppercase tracking-wide">Finalize & activate</div>
+        <div className="text-sm text-brand font-medium uppercase tracking-wide">Finalize and activate</div>
         <h1 className="mt-1 font-display text-display-lg text-ink">Go live</h1>
         <p className="mt-2 text-ink-soft">
-          Confirm the display name strangers see — we already kept your QR safe until this step finishes.
+          Confirm the display name strangers see, we already kept your QR safe until this step finishes.
         </p>
       </>
     ) : (
       <>
         <div className="text-sm text-brand font-medium uppercase tracking-wide">Step 1 of 1</div>
-        <h1 className="mt-1 font-display text-display-lg text-ink">Activate your sticker</h1>
+        <h1 className="mt-1 font-display text-display-lg text-ink">Activate your tag</h1>
         <p className="mt-2 text-ink-soft">
           Add what should appear publicly. Your phone stays private unless you tap call / WhatsApp on the scan page.
         </p>
@@ -178,7 +178,7 @@ export function ActivateTagForm({
             </>
           ) : (
             <>
-              <Field label="Title" htmlFor="title" hint='Shown on every scan — e.g. “Golden Retriever · Max”.'>
+              <Field label="Title" htmlFor="title" hint='Shown on every scan, e.g. “Golden Retriever, Max”.'>
                 <Input
                   id="title"
                   value={title}
@@ -191,7 +191,7 @@ export function ActivateTagForm({
               <Field
                 label="Description (optional)"
                 htmlFor="description"
-                hint="Anything safe to publish — no phone numbers."
+                hint="Anything safe to publish, no phone numbers."
               >
                 <Textarea
                   id="description"
@@ -209,7 +209,7 @@ export function ActivateTagForm({
             <Field
               label="Display name"
               htmlFor="publicName"
-              hint="What strangers see on the public profile — e.g. 'Ahmed K.'."
+              hint="What strangers see on the public profile, e.g. 'Ahmed K.'."
             >
               <Input
                 id="publicName"

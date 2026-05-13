@@ -54,7 +54,7 @@ export const useCartStore = create<CartState>()(
       decrement: () => set({ qty: clampQty(get().qty - 1) }),
     }),
     {
-      name: 'qrsaathi-cart',
+      name: 'qtag-cart',
       partialize: (state) => ({ qty: state.qty, shopSku: state.shopSku }),
       merge: (persisted, current) => {
         const p = persisted as Partial<Pick<CartState, 'qty' | 'shopSku'>> | undefined;

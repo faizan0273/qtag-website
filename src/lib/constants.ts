@@ -3,15 +3,15 @@ import { isShopSku, shopCatalogById } from '@/lib/shop-products';
 import type { ProductType } from '@/lib/product-type';
 
 /* -------------------------------------------------------------------------- */
-/*  Legacy single SKU (homepage, old links — no shopSku on order)           */
+/*  Legacy single SKU (homepage, old links, no shopSku on order)           */
 /* -------------------------------------------------------------------------- */
 
 export const PRODUCT = {
   sku: 'VEHICLE-QR-001',
-  name: 'Vehicle QR Sticker',
-  shortDescription: 'A weather-resistant QR sticker for your windshield.',
+  name: 'Safety QR tag',
+  shortDescription: 'A weather-resistant physical tag you can mount where you need it.',
   pricePkr: publicEnv.PRODUCT_PRICE_PKR,
-  imageAlt: `A ${publicEnv.NEXT_PUBLIC_BRAND_NAME} vehicle QR sticker on a car windshield`,
+  imageAlt: `A ${publicEnv.NEXT_PUBLIC_BRAND_NAME} safety QR tag`,
 } as const;
 
 /* -------------------------------------------------------------------------- */
@@ -59,15 +59,18 @@ export function orderLineTitleFromSku(shopSku?: string | null): string {
   return PRODUCT.name;
 }
 
+export type CheckoutPaymentMethod = 'COD' | 'JAZZCASH';
+
 export function quoteOrder(
   quantity: number,
-  paymentMethod: 'COD',
+  paymentMethod: CheckoutPaymentMethod,
   shopSku?: string | null,
 ): OrderQuote {
   const unit = orderUnitPricePkr(shopSku);
   const subtotal = unit * quantity;
   const freeShipping = subtotal >= publicEnv.FREE_SHIPPING_THRESHOLD_PKR;
   const shipping = freeShipping ? 0 : publicEnv.SHIPPING_FEE_PKR;
+  // Only Cash on Delivery carries the COD handling fee.
   const codFee = paymentMethod === 'COD' ? publicEnv.COD_FEE_PKR : 0;
   return {
     subtotalPkr: subtotal,

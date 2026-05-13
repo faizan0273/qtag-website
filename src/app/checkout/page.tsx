@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Field, Input, Select, Textarea } from '@/components/ui/Input';
 import {
+  type CheckoutPaymentMethod,
   orderLineTitleFromSku,
   orderUnitPricePkr,
   PK_PROVINCES,
@@ -39,6 +40,7 @@ export default function CheckoutPage() {
 
   const [shipping, setShipping] = useState(initialShipping);
   const [notes, setNotes] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>('COD');
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -62,7 +64,10 @@ export default function CheckoutPage() {
     setShipping((s) => (s.phone ? s : { ...s, phone }));
   }, [sessionUser?.phone]);
 
-  const quote = useMemo(() => quoteOrder(qty, 'COD', shopSku), [qty, shopSku]);
+  const quote = useMemo(
+    () => quoteOrder(qty, paymentMethod, shopSku),
+    [qty, paymentMethod, shopSku],
+  );
   const lineTitle = orderLineTitleFromSku(shopSku);
   const unitPkr = orderUnitPricePkr(shopSku);
 
@@ -82,13 +87,19 @@ export default function CheckoutPage() {
             quantity: qty,
             shopSku,
             shipping,
-            paymentMethod: 'COD',
+            paymentMethod,
             notes,
           }),
         });
         const json = await res.json();
         if (!json.ok) {
           setError(json.error?.message ?? 'Could not place order.');
+          return;
+        }
+        const payment = json.data?.payment;
+        if (payment?.provider === 'JAZZCASH' && payment.redirectUrl) {
+          // Hand off to the server page that auto-submits to JazzCash.
+          window.location.href = payment.redirectUrl;
           return;
         }
         router.push(`/order-success/${json.data.order.id}`);
@@ -101,7 +112,7 @@ export default function CheckoutPage() {
   return (
     <div className="container-page py-10 md:py-16">
       <h1 className="font-display text-display-lg text-ink">Checkout</h1>
-      <p className="mt-2 text-ink-soft">Cash on delivery. Standard 2–3 day delivery to major cities.</p>
+      <p className="mt-2 text-ink-soft">Standard 2 to 3 day delivery to major cities.</p>
 
       <form onSubmit={submit} className="mt-10 grid lg:grid-cols-3 gap-8 items-start">
         {/* ---- Shipping form ---- */}
@@ -197,19 +208,27 @@ export default function CheckoutPage() {
 
           <Card padding="lg">
             <h2 className="font-display text-xl text-ink mb-4">Payment</h2>
-            <label className="flex items-center gap-3 p-4 rounded-xl border border-brand bg-brand-soft cursor-pointer">
-              <input type="radio" checked readOnly className="accent-brand" />
-              <div>
-                <div className="font-medium text-ink">Cash on Delivery</div>
-                <div className="text-sm text-ink-muted">Pay the rider when your sticker arrives.</div>
-              </div>
-              <div className="ml-auto text-sm text-ink-soft tnum">
-                +{formatPkr(quote.codFeePkr)} fee
-              </div>
-            </label>
-            <p className="mt-4 text-xs text-ink-muted">
-              Card and JazzCash payments coming soon.
-            </p>
+            <div className="space-y-3">
+              <PaymentOption
+                checked={paymentMethod === 'COD'}
+                onSelect={() => setPaymentMethod('COD')}
+                title="Cash on Delivery"
+                subtitle="Pay the rider when your order arrives."
+                right={`+${formatPkr(quote.codFeePkr)} fee`}
+              />
+              <PaymentOption
+                checked={paymentMethod === 'JAZZCASH'}
+                onSelect={() => setPaymentMethod('JAZZCASH')}
+                title="JazzCash"
+                subtitle="Pay securely now with your JazzCash mobile account or card."
+                right="No COD fee"
+              />
+            </div>
+            {paymentMethod === 'JAZZCASH' ? (
+              <p className="mt-4 text-xs text-ink-muted">
+                You&apos;ll be redirected to JazzCash to complete payment, then sent back to your order page.
+              </p>
+            ) : null}
           </Card>
         </div>
 
@@ -237,7 +256,9 @@ export default function CheckoutPage() {
                   quote.freeShippingApplied ? 'Free' : formatPkr(quote.shippingPkr)
                 }
               />
-              <Row label="COD fee" value={formatPkr(quote.codFeePkr)} />
+              {paymentMethod === 'COD' ? (
+                <Row label="COD fee" value={formatPkr(quote.codFeePkr)} />
+              ) : null}
               <div className="border-t border-paper-line pt-3 flex justify-between font-display text-lg text-ink">
                 <span>Total</span>
                 <span className="tnum">{formatPkr(quote.totalPkr)}</span>
@@ -249,7 +270,7 @@ export default function CheckoutPage() {
             ) : null}
 
             <Button type="submit" size="lg" fullWidth className="mt-6" loading={pending}>
-              Place order
+              {paymentMethod === 'JAZZCASH' ? 'Pay with JazzCash' : 'Place order'}
             </Button>
             <p className="mt-3 text-xs text-ink-muted text-center">
               By placing this order you accept our terms.
@@ -267,5 +288,40 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt>{label}</dt>
       <dd className="text-ink tnum">{value}</dd>
     </div>
+  );
+}
+
+function PaymentOption({
+  checked,
+  onSelect,
+  title,
+  subtitle,
+  right,
+}: {
+  checked: boolean;
+  onSelect: () => void;
+  title: string;
+  subtitle: string;
+  right?: string;
+}) {
+  return (
+    <label
+      className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+        checked ? 'border-brand bg-brand-soft' : 'border-paper-line hover:border-ink-muted'
+      }`}
+    >
+      <input
+        type="radio"
+        name="paymentMethod"
+        checked={checked}
+        onChange={onSelect}
+        className="accent-brand"
+      />
+      <div>
+        <div className="font-medium text-ink">{title}</div>
+        <div className="text-sm text-ink-muted">{subtitle}</div>
+      </div>
+      {right ? <div className="ml-auto text-sm text-ink-soft tnum">{right}</div> : null}
+    </label>
   );
 }

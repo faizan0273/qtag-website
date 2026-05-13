@@ -33,7 +33,7 @@ export const createOrderSchema = z.object({
     city: z.string().min(2).max(80),
     province: z.enum(['Punjab', 'Sindh', 'KPK', 'Balochistan', 'Islamabad', 'AJK', 'GB']),
   }),
-  paymentMethod: z.enum(['COD']), // MVP: COD only. Add 'CARD'|'WALLET' here later.
+  paymentMethod: z.enum(['COD', 'JAZZCASH']),
   notes: z.string().max(500).optional().or(z.literal('')),
 });
 
@@ -68,13 +68,16 @@ export const activateTagSchema = z
     publicName: z
       .string()
       .min(1, 'Display name is required')
-      .max(40, 'Keep it short — first name + initial is fine'),
+      .max(40, 'Keep it short, first name and initial is fine'),
   })
   .superRefine((data, ctx) => {
     const pt = data.productType ?? 'CAR';
     if (pt === 'CAR') {
       if (!data.vehicle) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Vehicle details are required for car tags.' });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Fill in the details required for this tag type (vehicle tags need plate, make, and colour).',
+        });
       }
     } else if (!data.title?.trim()) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Title is required.', path: ['title'] });

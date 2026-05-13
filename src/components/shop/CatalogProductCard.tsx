@@ -87,6 +87,28 @@ function MiniQrArt() {
   );
 }
 
+function ProductVisual({ title }: { title: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-[1.35rem] border border-paper-line bg-gradient-to-br from-brand/14 via-paper-card to-paper-line/50 p-4">
+      <div className="absolute right-4 top-4 h-16 w-16 rounded-full bg-brand/10 blur-2xl" />
+      <div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-ink/5 blur-2xl" />
+      <div className="relative flex min-h-36 items-center justify-center">
+        <div className="w-40 rounded-2xl border border-paper-line bg-paper-card p-3 shadow-cardHover rotate-[-3deg]">
+          <div className="flex items-center justify-between gap-3">
+            <MiniQrArt />
+            <div className="min-w-0 text-right">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">{BRAND_NAME}</p>
+              <p className="mt-1 text-xs font-medium leading-tight text-ink line-clamp-2">{title}</p>
+            </div>
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-paper-line" />
+          <div className="mt-2 h-2 w-2/3 rounded-full bg-paper-line" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   product: ShopCatalogEntry;
   onBuy: (sku: ShopSku, qty: number, tagsPerPack: number) => void;
@@ -94,109 +116,190 @@ interface Props {
 
 export function CatalogProductCard({ product: p, onBuy }: Props) {
   const [qty, setQty] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
   const pct = discountPercent(p.pricePkr, p.compareAtPkr);
   const maxQtyByTags = Math.min(20, Math.floor(100 / p.tagsPerPack));
   const subtotal = p.pricePkr * qty;
 
   return (
-    <Card padding="sm" className="flex flex-col h-full overflow-hidden shadow-card hover:shadow-cardHover transition-shadow">
-      <div className="flex gap-3">
-        <div className="rounded-xl bg-gradient-to-br from-brand/12 via-paper-card to-paper-line/30 p-2.5 border border-paper-line shrink-0">
-          <MiniQrArt />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-brand">{p.categoryLabel}</p>
-          <h2 className="mt-0.5 font-display text-lg sm:text-xl text-ink leading-tight">{p.title}</h2>
-          <p className="mt-1 text-xs text-ink-muted line-clamp-2">{p.subtitle}</p>
-        </div>
-      </div>
+    <>
+      <Card
+        padding="sm"
+        className="group flex h-full flex-col overflow-hidden shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-cardHover"
+      >
+        <button type="button" className="block flex-1 text-left" onClick={() => setIsOpen(true)}>
+          <ProductVisual title={p.title} />
 
-      <p className="mt-3 text-sm text-ink-soft leading-snug line-clamp-3">{p.summary}</p>
-
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <div className="font-display text-2xl text-ink tnum leading-none">{formatPkr(p.pricePkr)}</div>
-          {p.compareAtPkr ? (
-            <div className="mt-1 text-xs">
-              <span className="line-through text-ink-muted tnum">{formatPkr(p.compareAtPkr)}</span>
+          <div className="mt-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">{p.categoryLabel}</p>
+                <h2 className="mt-1 font-display text-xl leading-tight text-ink">{p.title}</h2>
+              </div>
               {pct != null ? (
-                <span className="ml-2 text-success font-medium">{pct}% off</span>
+                <span className="shrink-0 rounded-full bg-success/10 px-2 py-1 text-[11px] font-semibold text-success">
+                  {pct}% off
+                </span>
               ) : null}
             </div>
-          ) : null}
+
+            <p className="mt-2 text-sm leading-relaxed text-ink-muted line-clamp-2">{p.subtitle}</p>
+
+            <div className="mt-4 flex items-end justify-between gap-3">
+              <div>
+                <div className="font-display text-2xl leading-none text-ink tnum">{formatPkr(p.pricePkr)}</div>
+                {p.compareAtPkr ? (
+                  <div className="mt-1 text-xs text-ink-muted line-through tnum">{formatPkr(p.compareAtPkr)}</div>
+                ) : null}
+              </div>
+              <p className="rounded-full bg-paper-line/45 px-3 py-1 text-[11px] font-medium text-ink-soft">
+                {p.tagsPerPack} QR UID{p.tagsPerPack > 1 ? 's' : ''}
+              </p>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {p.offers.slice(0, 2).map((o) => (
+                <span key={o} className="rounded-full border border-paper-line bg-paper/60 px-3 py-1 text-[11px] text-ink-soft">
+                  {o}
+                </span>
+              ))}
+            </div>
+          </div>
+        </button>
+
+        <div className="mt-5 border-t border-paper-line pt-4">
+          <Button type="button" fullWidth variant="secondary" onClick={() => setIsOpen(true)}>
+            View details
+          </Button>
         </div>
-        <p className="text-[11px] text-ink-muted">
-          {p.tagsPerPack} QR UID{p.tagsPerPack > 1 ? 's' : ''} / {p.unitLabel}
-        </p>
-      </div>
+      </Card>
 
-      <ul className="mt-4 space-y-1.5 text-xs text-ink-soft">
-        {p.offers.slice(0, 4).map((o) => (
-          <li key={o} className="flex gap-2">
-            <span className="text-brand mt-0.5 shrink-0" aria-hidden>
-              ✓
-            </span>
-            <span>{o}</span>
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-4 grid grid-cols-3 gap-2 text-[11px]">
-        {p.specs.map((s) => (
-          <div key={s.label} className="rounded-lg bg-paper-line/25 px-2 py-1.5 border border-paper-line/50">
-            <div className="text-ink-muted uppercase tracking-wide">{s.label}</div>
-            <div className="mt-0.5 font-medium text-ink leading-tight">{s.value}</div>
-          </div>
-        ))}
-      </div>
-
-      <details className="mt-4 group border border-paper-line rounded-xl bg-paper/30 open:bg-paper-card">
-        <summary className="cursor-pointer list-none px-3 py-2.5 text-sm font-medium text-brand flex items-center justify-between gap-2 select-none [&::-webkit-details-marker]:hidden">
-          <span>Full details</span>
-          <span className="text-ink-muted text-xs font-normal group-open:rotate-180 transition-transform">▼</span>
-        </summary>
-        <div className="px-3 pb-3 pt-0 space-y-4 border-t border-paper-line/80">
-          <MatrixTable rows={p.matrixRows} />
-          <ul className="space-y-1.5 text-xs text-ink-soft">
-            {p.highlights.map((line) => (
-              <li key={line}>• {line}</li>
-            ))}
-          </ul>
-          <div className="space-y-2 text-xs text-ink-soft leading-relaxed">
-            {p.story.map((para) => (
-              <p key={para}>{para}</p>
-            ))}
-          </div>
-        </div>
-      </details>
-
-      <div className="mt-auto pt-5 border-t border-paper-line flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="text-[10px] uppercase tracking-wide text-ink-muted">Quantity</div>
-            <QtyStepper
-              value={qty}
-              onChange={(n) => setQty(Math.min(n, maxQtyByTags))}
-              disabledPlus={qty >= maxQtyByTags}
-            />
-          </div>
-          <div className="text-right">
-            <div className="text-[10px] uppercase tracking-wide text-ink-muted">Subtotal</div>
-            <div className="font-display text-lg tnum text-ink">{formatPkr(subtotal)}</div>
-          </div>
-        </div>
-        <Button
-          size="lg"
-          fullWidth
-          onClick={() => onBuy(p.id, qty, p.tagsPerPack)}
-          disabled={qty * p.tagsPerPack > 100}
+      {isOpen ? (
+        <div
+          className="fixed inset-0 z-50 grid place-items-end bg-ink/45 px-3 py-3 backdrop-blur-sm sm:place-items-center sm:px-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={`${p.id}-title`}
+          onClick={() => setIsOpen(false)}
         >
-          Buy · COD
-        </Button>
-        <p className="text-[10px] text-center text-ink-muted">
-          {BRAND_NAME} checkout · prices in PKR
-        </p>
-      </div>
-    </Card>
+          <div
+            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[1.5rem] border border-paper-line bg-paper-card shadow-cardHover"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-paper-line bg-paper-card/95 px-4 py-3 backdrop-blur sm:px-6">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">{p.categoryLabel}</p>
+                <h2 id={`${p.id}-title`} className="font-display text-xl leading-tight text-ink sm:text-2xl">
+                  {p.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-paper-line text-xl leading-none text-ink-muted transition-colors hover:bg-paper hover:text-ink"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close product details"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="space-y-4">
+                <ProductVisual title={p.title} />
+                <Card padding="sm" className="bg-paper/60 shadow-none">
+                  <p className="text-sm leading-relaxed text-ink-soft">{p.summary}</p>
+                  <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <div className="font-display text-3xl leading-none text-ink tnum">{formatPkr(p.pricePkr)}</div>
+                      {p.compareAtPkr ? (
+                        <div className="mt-1 text-sm">
+                          <span className="line-through text-ink-muted tnum">{formatPkr(p.compareAtPkr)}</span>
+                          {pct != null ? <span className="ml-2 font-medium text-success">{pct}% off</span> : null}
+                        </div>
+                      ) : null}
+                    </div>
+                    <p className="text-xs text-ink-muted">
+                      {p.tagsPerPack} QR UID{p.tagsPerPack > 1 ? 's' : ''} / {p.unitLabel}
+                    </p>
+                  </div>
+                </Card>
+
+                <div className="grid grid-cols-3 gap-2 text-[11px]">
+                  {p.specs.map((s) => (
+                    <div key={s.label} className="rounded-xl border border-paper-line bg-paper/55 px-3 py-2">
+                      <div className="uppercase tracking-wide text-ink-muted">{s.label}</div>
+                      <div className="mt-1 font-medium leading-tight text-ink">{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <section>
+                  <h3 className="font-display text-lg text-ink">What you get</h3>
+                  <ul className="mt-3 grid gap-2 text-sm text-ink-soft sm:grid-cols-2">
+                    {p.offers.map((o) => (
+                      <li key={o} className="flex gap-2 rounded-xl border border-paper-line bg-paper/45 px-3 py-2">
+                        <span className="mt-0.5 shrink-0 text-brand" aria-hidden>
+                          ✓
+                        </span>
+                        <span>{o}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="font-display text-lg text-ink">Complete info</h3>
+                  <div className="mt-3 space-y-4">
+                    <MatrixTable rows={p.matrixRows} />
+                    <ul className="space-y-1.5 text-sm text-ink-soft">
+                      {p.highlights.map((line) => (
+                        <li key={line}>• {line}</li>
+                      ))}
+                    </ul>
+                    <div className="space-y-2 text-sm leading-relaxed text-ink-soft">
+                      {p.story.map((para) => (
+                        <p key={para}>{para}</p>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
+                <Card padding="sm" className="bg-paper/70 shadow-none">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wide text-ink-muted">Quantity</div>
+                      <QtyStepper
+                        value={qty}
+                        onChange={(n) => setQty(Math.min(n, maxQtyByTags))}
+                        disabledPlus={qty >= maxQtyByTags}
+                      />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[10px] uppercase tracking-wide text-ink-muted">Subtotal</div>
+                      <div className="font-display text-xl text-ink tnum">{formatPkr(subtotal)}</div>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    size="lg"
+                    fullWidth
+                    className="mt-4"
+                    onClick={() => onBuy(p.id, qty, p.tagsPerPack)}
+                    disabled={qty * p.tagsPerPack > 100}
+                  >
+                    Buy now
+                  </Button>
+                  <p className="mt-2 text-center text-[10px] text-ink-muted">
+                    {BRAND_NAME} checkout · prices in PKR
+                  </p>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }

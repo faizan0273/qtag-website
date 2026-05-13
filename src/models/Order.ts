@@ -17,6 +17,15 @@ export interface IShippingAddress {
   province: string;
 }
 
+export type PaymentMethod = 'COD' | 'JAZZCASH';
+
+export type PaymentStatus =
+  | 'NOT_REQUIRED' // COD orders — paid on delivery, no online step
+  | 'PENDING'     // JazzCash payment initiated, awaiting result
+  | 'PAID'        // JazzCash transaction succeeded
+  | 'FAILED'      // JazzCash transaction declined / failed verification
+  | 'CANCELLED';  // User abandoned or JazzCash signalled cancellation
+
 export interface IOrder {
   userId: Types.ObjectId;
   quantity: number;
@@ -28,7 +37,7 @@ export interface IOrder {
   shippingPkr: number;
   codFeePkr: number;
   totalPkr: number;
-  paymentMethod: 'COD';
+  paymentMethod: PaymentMethod;
   status: OrderStatus;
   shipping: IShippingAddress;
   notes?: string;
@@ -40,6 +49,14 @@ export interface IOrder {
   shippedAt?: Date;
   deliveredAt?: Date;
   cancelledAt?: Date;
+  // ---- Online payment tracking (JazzCash etc.) ----
+  paymentStatus?: PaymentStatus;
+  paymentRef?: string;          // Our outbound `pp_TxnRefNo`
+  paymentProviderTxnId?: string; // JazzCash's `pp_RetreivalReferenceNo`
+  paymentResponseCode?: string;
+  paymentResponseMessage?: string;
+  paidAt?: Date;
+  paymentRawResponse?: Record<string, string>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,7 +85,7 @@ const OrderSchema = new Schema<IOrder>(
     shippingPkr: { type: Number, required: true, min: 0 },
     codFeePkr: { type: Number, required: true, min: 0 },
     totalPkr: { type: Number, required: true, min: 0 },
-    paymentMethod: { type: String, enum: ['COD'], default: 'COD' },
+    paymentMethod: { type: String, enum: ['COD', 'JAZZCASH'], default: 'COD' },
     status: {
       type: String,
       enum: ['PENDING', 'PAID', 'FULFILLED', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
@@ -83,6 +100,18 @@ const OrderSchema = new Schema<IOrder>(
     shippedAt: Date,
     deliveredAt: Date,
     cancelledAt: Date,
+    paymentStatus: {
+      type: String,
+      enum: ['NOT_REQUIRED', 'PENDING', 'PAID', 'FAILED', 'CANCELLED'],
+      default: 'NOT_REQUIRED',
+      index: true,
+    },
+    paymentRef: { type: String, index: true, sparse: true },
+    paymentProviderTxnId: { type: String },
+    paymentResponseCode: { type: String },
+    paymentResponseMessage: { type: String },
+    paidAt: { type: Date },
+    paymentRawResponse: { type: Schema.Types.Mixed },
   },
   { timestamps: true },
 );

@@ -20,7 +20,7 @@ export default function GlobalError({
       <div className="text-5xl mb-3">⚠️</div>
       <h1 className="font-display text-display-md text-ink">Something went wrong.</h1>
       <p className="mt-3 text-ink-soft">
-        We've been notified. Please try again — most issues clear up quickly.
+        We've been notified. Please try again, most issues clear up quickly.
       </p>
       {error.digest ? (
         <p className="mt-2 text-xs text-ink-muted font-mono">Ref: {error.digest}</p>

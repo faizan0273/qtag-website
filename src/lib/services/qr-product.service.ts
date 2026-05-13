@@ -70,7 +70,7 @@ export function contactMessageItemLabel(tag: Pick<ITag, 'productType' | 'title' 
     if (tag.vehicle) {
       return `${tag.vehicle.color} ${tag.vehicle.make} (${tag.vehicle.plate})`;
     }
-    return 'your vehicle';
+    return 'your tag';
   }
   return deriveTagTitle(tag);
 }
@@ -83,7 +83,7 @@ export function isPublicProfileLive(status: TagStatus, ownerId?: Types.ObjectId)
 
 function ownerLinks(phone: string): PublicContactLinks {
   const digits = phone.replace(/\D/g, '');
-  const text = encodeURIComponent(`Hello — I scanned your Scano tag.`);
+  const text = encodeURIComponent(`Hello, I scanned your Qtag tag.`);
   return {
     tel: `tel:${phone}`,
     whatsappHref: `https://wa.me/${digits}?text=${text}`,
@@ -357,7 +357,7 @@ export async function scanQRHandler(req: NextRequest, slug: string) {
   }
 
   const productWord = productTypeAlertFragment(pt);
-  const smsBody = `Scano: Someone scanned your ${productWord} QR.`;
+  const smsBody = `Qtag: Someone scanned your ${productWord} QR.`;
 
   let notified = false;
   const wa = await notifyOwnerQrScan(owner.phone, productWord);

@@ -33,8 +33,8 @@ export function ShopCatalog() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">{BRAND_NAME} shop</p>
         <h1 className="mt-2 font-display text-display-md md:text-display-lg text-ink">Physical QR tags</h1>
         <p className="mt-3 text-sm md:text-base text-ink-soft leading-relaxed">
-          Every product below uses the same privacy-first scan flow: people reach you through {BRAND_NAME} — your
-          number stays off the public page. Compare all six on one screen, then open details per card.
+          Every product below uses the same privacy first scan flow: people reach you through {BRAND_NAME}, and your
+          number stays off the public page. Tap a card to see materials, use cases, and checkout options.
         </p>
         <p className="mt-2 text-xs text-ink-muted">
           Store &amp; activation:{' '}
@@ -50,7 +50,7 @@ export function ShopCatalog() {
 
       <footer className="mt-12 max-w-2xl mx-auto text-center text-xs text-ink-muted space-y-3">
         <p>
-          Shipping, COD fee, and free-shipping threshold are calculated at checkout. Capabilities in the grid reflect
+          Shipping and totals are calculated at checkout. Capabilities in the grid reflect
           what {BRAND_NAME} is built for today; we expand channels over time.
         </p>
         <Link href="/dashboard/tags/new" className="inline-block text-sm font-medium text-brand hover:text-brand-dark">

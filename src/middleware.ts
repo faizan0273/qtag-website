@@ -29,6 +29,7 @@ export async function middleware(req: NextRequest) {
   const isProtected =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/checkout') ||
+    pathname.startsWith('/payments/') ||
     pathname.match(/^\/t\/[^/]+\/activate$/);
 
   if (isProtected) {
@@ -58,6 +59,7 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/checkout/:path*',
+    '/payments/:path*',
     '/t/:uid/activate',
     '/login',
     '/verify',

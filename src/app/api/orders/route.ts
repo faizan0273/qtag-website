@@ -13,6 +13,7 @@ import {
 } from '@/lib/constants';
 import { normalizePkPhone } from '@/lib/phone';
 import { isShopSku } from '@/lib/shop-products';
+import { isJazzCashConfigured } from '@/lib/env';
 export const dynamic = 'force-dynamic';
 
 
@@ -32,13 +33,17 @@ export async function POST(req: NextRequest) {
 
     const { quantity, shipping, paymentMethod, notes, shopSku: rawSku } = parsed.data;
 
+    if (paymentMethod === 'JAZZCASH' && !isJazzCashConfigured) {
+      return bad('BAD_REQUEST', 'JazzCash is not configured on this server.');
+    }
+
     const shopSku =
       rawSku != null && rawSku !== '' && isShopSku(rawSku) ? rawSku : undefined;
 
     const tagsPerPack = orderTagsPerPack(shopSku);
     const totalTags = quantity * tagsPerPack;
     if (totalTags > 100) {
-      return bad('VALIDATION_ERROR', 'Reduce quantity — this product reserves many tags per pack.');
+      return bad('VALIDATION_ERROR', 'Reduce quantity, this product reserves many tags per pack.');
     }
 
     const phone = normalizePkPhone(shipping.phone);
@@ -79,6 +84,7 @@ export async function POST(req: NextRequest) {
       totalPkr: quote.totalPkr,
       paymentMethod,
       status: 'PENDING',
+      paymentStatus: paymentMethod === 'JAZZCASH' ? 'PENDING' : 'NOT_REQUIRED',
       shipping: { ...shipping, phone },
       notes: notes || undefined,
       tagUids,
@@ -97,6 +103,14 @@ export async function POST(req: NextRequest) {
       })),
     );
 
+    const payment =
+      paymentMethod === 'JAZZCASH'
+        ? {
+            provider: 'JAZZCASH' as const,
+            redirectUrl: `/payments/jazzcash/${order.id}`,
+          }
+        : null;
+
     return ok(
       {
         order: {
@@ -104,8 +118,11 @@ export async function POST(req: NextRequest) {
           quantity: order.quantity,
           totalPkr: order.totalPkr,
           status: order.status,
+          paymentMethod: order.paymentMethod,
+          paymentStatus: order.paymentStatus ?? 'NOT_REQUIRED',
           tagUids: order.tagUids,
         },
+        payment,
       },
       { status: 201 },
     );

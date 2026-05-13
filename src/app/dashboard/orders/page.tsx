@@ -62,7 +62,7 @@ export default async function OrdersPage() {
                       #{String(o._id).slice(-8)}
                     </div>
                     <div className="mt-1 font-medium text-ink">
-                      {o.quantity} sticker{o.quantity > 1 ? 's' : ''} · {formatPkr(o.totalPkr)}
+                      {o.quantity} item{o.quantity > 1 ? 's' : ''} · {formatPkr(o.totalPkr)}
                     </div>
                     <div className="mt-0.5 text-xs text-ink-muted">
                       Placed {new Date(o.createdAt).toLocaleDateString('en-PK')}

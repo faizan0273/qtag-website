@@ -1,29 +1,41 @@
 'use client';
 
 import { useCallback, useId, useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Stagger, StaggerItem } from '@/components/motion';
+import { EASE, SPRING } from '@/lib/motion';
 
 export type FaqItem = { id: string; q: string; a: string };
 
 function Chevron({ open }: { open: boolean }) {
   return (
-    <span
-      className={[
-        'mt-0.5 grid place-items-center h-8 w-8 shrink-0 rounded-lg border border-paper-line bg-paper text-ink-soft transition-transform',
-        open ? 'rotate-180' : '',
-      ].join(' ')}
+    <motion.span
+      className="mt-0.5 grid place-items-center h-8 w-8 shrink-0 rounded-lg border border-paper-line bg-paper text-ink-soft"
       aria-hidden
+      animate={{ rotate: open ? 180 : 0 }}
+      transition={SPRING.snappy}
     >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M6 9l6 6 6-6" />
       </svg>
-    </span>
+    </motion.span>
   );
 }
 
 export function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
   const baseId = useId();
+  const reduceMotion = useReducedMotion();
   const allIds = useMemo(() => items.map((it) => it.id), [items]);
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set());
 
@@ -65,17 +77,23 @@ export function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
         </div>
       </div>
 
-      <div className="mt-6 grid md:grid-cols-2 md:items-start gap-4 md:gap-6">
+      <Stagger className="mt-6 grid md:grid-cols-2 md:items-start gap-4 md:gap-6" stagger={0.07}>
         {items.map((item) => {
           const panelId = `${baseId}-panel-${item.id}`;
+          const buttonId = `${baseId}-btn-${item.id}`;
           const isOpen = openIds.has(item.id);
+
           return (
-            <Card key={item.id} padding="none" className="h-fit min-w-0 overflow-hidden shadow-card">
+            <StaggerItem key={item.id} blur>
+              <Card
+                padding="none"
+                className="h-fit min-w-0 overflow-hidden shadow-card transition-shadow duration-300 hover:shadow-cardHover"
+              >
               <h3 className="font-display text-lg text-ink leading-snug">
                 <button
                   type="button"
-                  id={`${baseId}-btn-${item.id}`}
-                  className="w-full text-left flex items-start justify-between gap-3 px-5 py-4 md:px-6 md:py-5 hover:bg-paper-line/30 transition-colors"
+                  id={buttonId}
+                  className="w-full text-left flex items-start justify-between gap-3 px-5 py-4 md:px-6 md:py-5 transition-colors hover:bg-paper-line/30"
                   aria-expanded={isOpen}
                   aria-controls={panelId}
                   onClick={() => toggle(item.id)}
@@ -84,22 +102,45 @@ export function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
                   <Chevron open={isOpen} />
                 </button>
               </h3>
-              <div
-                id={panelId}
-                role="region"
-                aria-labelledby={`${baseId}-btn-${item.id}`}
-                className={
-                  isOpen
-                    ? 'border-t border-paper-line px-5 pb-5 pt-4 md:px-6'
-                    : 'hidden'
-                }
-              >
-                <p className="text-ink-soft leading-relaxed">{item.a}</p>
-              </div>
+
+              {/*
+                AnimatePresence drives a height + opacity transition.
+                `initial={false}` so cards already-closed on mount don't
+                animate. The panel keeps its region role + aria wiring.
+              */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="panel"
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={buttonId}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: reduceMotion ? 0 : 0.38, ease: EASE.outSoft }}
+                    className="overflow-hidden"
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: reduceMotion ? 0 : 0.32,
+                        ease: EASE.outSoft,
+                        delay: reduceMotion ? 0 : 0.05,
+                      }}
+                      className="border-t border-paper-line px-5 pb-5 pt-4 md:px-6"
+                    >
+                      <p className="text-ink-soft leading-relaxed">{item.a}</p>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Card>
+            </StaggerItem>
           );
         })}
-      </div>
+      </Stagger>
     </div>
   );
 }

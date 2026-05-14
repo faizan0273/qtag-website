@@ -1,61 +1,46 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { getCurrentSession } from '@/lib/auth';
-import { BRAND_LOGO_SRC, BRAND_NAME } from '@/lib/brand';
 import { LogoutButton } from './LogoutButton';
+import { HeaderShell } from './HeaderShell';
 
+/**
+ * Server Component: fetches the session, then hands the rendered auth
+ * buttons to `HeaderShell` (a Client Component) which owns all the
+ * interactive chrome — scroll state, animated underline, mobile menu.
+ *
+ * Passing JSX from a Server Component into a Client Component as a prop
+ * is fully supported in the App Router, and keeps session logic on the
+ * server.
+ */
 export async function Header() {
   const session = await getCurrentSession();
 
-  return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-paper/80 border-b border-paper-line">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group" aria-label={`${BRAND_NAME} home`}>
-          <Image
-            src={BRAND_LOGO_SRC}
-            alt=""
-            width={180}
-            height={52}
-            className="h-12 w-auto max-h-12 object-contain object-left"
-            priority
-          />
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-7 text-[15px] text-ink-soft">
-          <Link href="/shop" className="hover:text-ink">Shop</Link>
-          <Link href="/#how" className="hover:text-ink">How it works</Link>
-          <Link href="/#faq" className="hover:text-ink">FAQ</Link>
-        </nav>
-
-        <div className="flex items-center gap-2">
-          {session ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="text-[15px] px-3 h-10 flex items-center rounded-lg hover:bg-paper-line/60 text-ink"
-              >
-                Dashboard
-              </Link>
-              <LogoutButton />
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="text-[15px] px-3 h-10 flex items-center rounded-lg hover:bg-paper-line/60 text-ink"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/shop"
-                className="text-[15px] px-4 h-10 flex items-center rounded-lg bg-ink text-paper hover:bg-ink-soft"
-              >
-                Shop tags
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-    </header>
+  const authSlot = session ? (
+    <>
+      <Link
+        href="/dashboard"
+        className="text-[15px] px-3 h-10 flex items-center rounded-lg text-ink transition-colors hover:bg-paper-line/60"
+      >
+        Dashboard
+      </Link>
+      <LogoutButton />
+    </>
+  ) : (
+    <>
+      <Link
+        href="/login"
+        className="text-[15px] px-3 h-10 flex items-center rounded-lg text-ink transition-colors hover:bg-paper-line/60"
+      >
+        Sign in
+      </Link>
+      <Link
+        href="/shop"
+        className="text-[15px] px-4 h-10 flex items-center rounded-lg bg-ink text-paper transition-colors hover:bg-ink-soft"
+      >
+        Shop tags
+      </Link>
+    </>
   );
+
+  return <HeaderShell authSlot={authSlot} />;
 }

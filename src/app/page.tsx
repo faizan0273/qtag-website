@@ -3,8 +3,30 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { FaqAccordion } from '@/components/marketing/FaqAccordion';
+import {
+  CountUp,
+  HeroGlow,
+  HoverDrift,
+  MagneticButton,
+  Parallax,
+  Reveal,
+  RevealText,
+  ScrollIndicator,
+  Stagger,
+  StaggerItem,
+  TiltCard,
+} from '@/components/motion';
 import { PRODUCT, formatPkr } from '@/lib/constants';
 import { BRAND_NAME } from '@/lib/brand';
+
+/*
+ * This page stays a Server Component — all content is server-rendered for
+ * SEO. The animation primitives imported above are individually marked
+ * 'use client', so only those small wrappers hydrate on the client.
+ *
+ * Content, copy, and structure are unchanged from the original; the only
+ * additions are motion wrappers.
+ */
 
 const HOW_STEPS = [
   {
@@ -67,155 +89,227 @@ const FAQ_ACCORDION_ITEMS = FAQ.map((f, i) => ({
   a: f.a,
 }));
 
+const PRICING_POINTS = [
+  'Weatherproof materials for outdoor and daily carry',
+  'Unique QR per unit, go live in seconds after activation',
+  'Personal numbers stay off the public page',
+  `WhatsApp and call relay through ${BRAND_NAME}`,
+  'Lost mode with optional reward',
+];
+
 export default function HomePage() {
   return (
     <>
       {/* ---------------------------------------- HERO -------------------- */}
       <section className="relative overflow-hidden grain bg-paper">
-        <div className="container-page pt-12 md:pt-20 pb-20 md:pb-28">
+        {/* Animated gradient + cursor light. Decorative, sits behind content. */}
+        <HeroGlow />
+
+        <div className="container-page relative pt-12 md:pt-20 pb-20 md:pb-28">
           <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-center">
             <div className="md:col-span-7">
-              <div className="inline-flex items-center gap-2 mb-6 text-xs font-medium tracking-wide uppercase text-brand bg-brand-soft px-3 py-1.5 rounded-full">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                Made in Pakistan
-              </div>
-              <h1 className="font-display text-display-xl text-ink">
-                Smart safety for everyone,
-                <br />
-                <span className="text-brand">everywhere.</span>
-              </h1>
-              <p className="mt-6 text-lg md:text-xl text-ink-soft max-w-readable leading-relaxed">
-                {BRAND_NAME} sells physical and digital QR safety tags for Pakistan. Each code opens a page you control,
-                medical notes, vehicle context, lost mode, or a WhatsApp relay, without putting your private number on
-                the tag. We ship nationwide with local support.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/shop">
-                  <Button size="lg">Shop tags, from {formatPkr(PRODUCT.pricePkr)}</Button>
-                </Link>
-                <Link href="/about">
-                  <Button size="lg" variant="secondary">
-                    About {BRAND_NAME}
-                  </Button>
-                </Link>
-                <Link href="#how">
-                  <Button size="lg" variant="secondary">
-                    See how it works
-                  </Button>
-                </Link>
-              </div>
+              {/*
+                Hero entrance plays on mount (`immediate`). The badge, copy
+                and CTAs stagger in; the headline runs its own line-mask
+                reveal, slotted into the sequence via an explicit delay.
+              */}
+              <Stagger immediate stagger={0.12} delayChildren={0.1}>
+                <StaggerItem>
+                  <div className="inline-flex items-center gap-2 mb-6 text-xs font-medium tracking-wide uppercase text-brand bg-brand-soft px-3 py-1.5 rounded-full">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
+                    Made in Pakistan
+                  </div>
+                </StaggerItem>
+
+                <RevealText
+                  as="h1"
+                  immediate
+                  delay={0.18}
+                  className="font-display text-display-xl text-ink"
+                  lines={[
+                    'Smart safety for everyone,',
+                    <span key="line-2" className="text-brand">
+                      everywhere.
+                    </span>,
+                  ]}
+                />
+
+                <StaggerItem>
+                  <p className="mt-6 text-lg md:text-xl text-ink-soft max-w-readable leading-relaxed">
+                    {BRAND_NAME} sells physical and digital QR safety tags for Pakistan. Each code opens a page you
+                    control, medical notes, vehicle context, lost mode, or a WhatsApp relay, without putting your
+                    private number on the tag. We ship nationwide with local support.
+                  </p>
+                </StaggerItem>
+
+                <StaggerItem>
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    <MagneticButton>
+                      <Link href="/shop">
+                        <Button size="lg">Shop tags, from {formatPkr(PRODUCT.pricePkr)}</Button>
+                      </Link>
+                    </MagneticButton>
+                    <MagneticButton>
+                      <Link href="/about">
+                        <Button size="lg" variant="secondary">
+                          About {BRAND_NAME}
+                        </Button>
+                      </Link>
+                    </MagneticButton>
+                    <MagneticButton>
+                      <Link href="#how">
+                        <Button size="lg" variant="secondary">
+                          See how it works
+                        </Button>
+                      </Link>
+                    </MagneticButton>
+                  </div>
+                </StaggerItem>
+              </Stagger>
             </div>
 
             <div className="md:col-span-5">
-              <div className="relative aspect-[4/5] max-w-md mx-auto overflow-hidden rounded-[28px] border border-paper-line bg-paper-card shadow-card">
-                <Image
-                  src="/herosectionimage.jpg"
-                  alt={`${BRAND_NAME} QR safety tag preview`}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 768px) 40vw, 90vw"
-                  priority
-                />
-              </div>
+              {/* Image fades in last, then drifts gently on scroll for depth. */}
+              <Reveal direction="up" delay={0.5} blur>
+                <Parallax speed={28}>
+                  <div className="relative aspect-[4/5] max-w-md mx-auto overflow-hidden rounded-[28px] border border-paper-line bg-paper-card shadow-card">
+                    <Image
+                      src="/herosectionimage.jpg"
+                      alt={`${BRAND_NAME} QR safety tag preview`}
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 768px) 40vw, 90vw"
+                      priority
+                    />
+                  </div>
+                </Parallax>
+              </Reveal>
             </div>
+          </div>
+
+          {/* Scroll cue — desktop only, fades out as the user scrolls. */}
+          <div className="mt-14 hidden md:flex justify-center">
+            <ScrollIndicator />
           </div>
         </div>
       </section>
 
+      {/* ---------------------------------------- STATS ------------------- */}
       <section className="border-y border-paper-line bg-paper-card/40">
         <div className="container-page py-12 md:py-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <Stagger className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6" stagger={0.1}>
             {HOME_STATS.map((s) => (
-              <Card key={s.label} padding="md" className="text-center md:text-left">
-                <div className="font-display text-2xl md:text-3xl text-brand">{s.value}</div>
-                <div className="mt-1 text-xs md:text-sm text-ink-muted leading-snug">{s.label}</div>
-              </Card>
+              <StaggerItem key={s.label} blur>
+                <TiltCard className="h-full" max={5} lift={5}>
+                  <Card
+                    padding="md"
+                    className="h-full text-center md:text-left transition-shadow duration-300 group-hover:shadow-cardHover"
+                  >
+                    <div className="font-display text-2xl md:text-3xl text-brand tnum">
+                      <CountUp value={s.value} />
+                    </div>
+                    <div className="mt-1 text-xs md:text-sm text-ink-muted leading-snug">{s.label}</div>
+                  </Card>
+                </TiltCard>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* ---------------------------------------- HOW IT WORKS ------------ */}
-      <section id="how" className="container-page py-20 md:py-28">
-        <div className="max-w-2xl">
+      <section id="how" className="container-page py-20 md:py-28 scroll-mt-24">
+        <Reveal as="div" className="max-w-2xl">
           <div className="text-sm font-medium text-brand uppercase tracking-wide">How it works</div>
-          <h2 className="mt-2 font-display text-display-lg text-ink">Three steps. That's it.</h2>
-        </div>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <h2 className="mt-2 font-display text-display-lg text-ink">Three steps. That&apos;s it.</h2>
+        </Reveal>
+
+        <Stagger className="mt-12 grid gap-6 md:grid-cols-3" stagger={0.12}>
           {HOW_STEPS.map((s) => (
-            <Card key={s.n} padding="lg" className="relative">
-              <div className="font-display text-5xl text-brand/20">{s.n}</div>
-              <h3 className="mt-4 font-display text-xl text-ink">{s.title}</h3>
-              <p className="mt-3 text-ink-soft leading-relaxed">{s.body}</p>
-            </Card>
+            <StaggerItem key={s.n} blur>
+              <TiltCard className="h-full" max={5}>
+                <Card
+                  padding="lg"
+                  className="relative h-full transition-shadow duration-300 group-hover:shadow-cardHover"
+                >
+                  <div className="font-display text-5xl text-brand/20">{s.n}</div>
+                  <h3 className="mt-4 font-display text-xl text-ink">{s.title}</h3>
+                  <p className="mt-3 text-ink-soft leading-relaxed">{s.body}</p>
+                </Card>
+              </TiltCard>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </section>
 
       {/* ---------------------------------------- FEATURES ---------------- */}
       <section className="bg-ink text-paper py-20 md:py-28">
         <div className="container-page">
-          <div className="max-w-2xl">
+          <Reveal as="div" className="max-w-2xl">
             <div className="text-sm font-medium text-brand-soft uppercase tracking-wide">Why {BRAND_NAME}</div>
             <h2 className="mt-2 font-display text-display-lg">
               Built for safety in Pakistan, not a generic import.
             </h2>
-          </div>
-          <div className="mt-12 grid gap-x-10 gap-y-8 md:grid-cols-3">
+          </Reveal>
+
+          <Stagger className="mt-12 grid gap-x-10 gap-y-8 md:grid-cols-3" stagger={0.1}>
             {FEATURES.map((f) => (
-              <div key={f.title} className="border-t border-white/15 pt-5">
-                <h3 className="font-display text-lg">{f.title}</h3>
-                <p className="mt-2 text-paper/70 leading-relaxed">{f.body}</p>
-              </div>
+              <StaggerItem key={f.title}>
+                <HoverDrift x={6}>
+                  <div className="border-t border-white/15 pt-5 transition-colors duration-300 hover:border-brand/60">
+                    <h3 className="font-display text-lg">{f.title}</h3>
+                    <p className="mt-2 text-paper/70 leading-relaxed">{f.body}</p>
+                  </div>
+                </HoverDrift>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* ---------------------------------------- PRICING ----------------- */}
       <section className="container-page py-20 md:py-28">
-        <Card padding="lg" className="md:p-14">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <div className="text-sm font-medium text-brand uppercase tracking-wide">Pricing</div>
-              <h2 className="mt-2 font-display text-display-lg text-ink">
-                Shop tags from {formatPkr(PRODUCT.pricePkr)}, more SKUs in the catalogue.
-              </h2>
-              <p className="mt-4 text-ink-soft text-lg leading-relaxed max-w-readable">
-                Checkout shows the exact line you picked. Add units for every place that needs a code.
-              </p>
-              <div className="mt-8">
-                <Link href="/shop">
-                  <Button size="lg">Browse shop</Button>
-                </Link>
+        <Reveal blur>
+          <Card padding="lg" className="md:p-14">
+            <div className="grid md:grid-cols-2 gap-10 items-center">
+              <div>
+                <div className="text-sm font-medium text-brand uppercase tracking-wide">Pricing</div>
+                <h2 className="mt-2 font-display text-display-lg text-ink">
+                  Shop tags from {formatPkr(PRODUCT.pricePkr)}, more SKUs in the catalogue.
+                </h2>
+                <p className="mt-4 text-ink-soft text-lg leading-relaxed max-w-readable">
+                  Checkout shows the exact line you picked. Add units for every place that needs a code.
+                </p>
+                <div className="mt-8">
+                  <MagneticButton>
+                    <Link href="/shop">
+                      <Button size="lg">Browse shop</Button>
+                    </Link>
+                  </MagneticButton>
+                </div>
+              </div>
+
+              <div>
+                <Stagger as="ul" className="space-y-3 text-ink-soft" stagger={0.08}>
+                  {PRICING_POINTS.map((line) => (
+                    <StaggerItem as="li" key={line} direction="left" className="flex items-start gap-3">
+                      <Check />
+                      <span>{line}</span>
+                    </StaggerItem>
+                  ))}
+                </Stagger>
               </div>
             </div>
-            <div>
-              <ul className="space-y-3 text-ink-soft">
-                {[
-                  'Weatherproof materials for outdoor and daily carry',
-                  'Unique QR per unit, go live in seconds after activation',
-                  'Personal numbers stay off the public page',
-                  `WhatsApp and call relay through ${BRAND_NAME}`,
-                  'Lost mode with optional reward',
-                ].map((line) => (
-                  <li key={line} className="flex items-start gap-3">
-                    <Check />
-                    <span>{line}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </Reveal>
       </section>
 
       {/* ---------------------------------------- FAQ --------------------- */}
-      <section id="faq" className="container-page pb-24">
-        <div className="max-w-2xl">
+      <section id="faq" className="container-page pb-24 scroll-mt-24">
+        <Reveal as="div" className="max-w-2xl">
           <div className="text-sm font-medium text-brand uppercase tracking-wide">FAQ</div>
           <h2 className="mt-2 font-display text-display-lg text-ink">Common questions.</h2>
-        </div>
+        </Reveal>
         <FaqAccordion items={FAQ_ACCORDION_ITEMS} />
       </section>
     </>
@@ -225,7 +319,16 @@ export default function HomePage() {
 function Check() {
   return (
     <span className="mt-1 grid place-items-center h-5 w-5 rounded-full bg-brand-soft text-brand shrink-0">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <polyline points="20 6 9 17 4 12" />
       </svg>
     </span>

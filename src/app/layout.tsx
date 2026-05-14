@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { StoreRehydration } from '@/components/providers/StoreRehydration';
+import { SmoothScroll } from '@/components/motion/SmoothScroll';
 import { BRAND_LOGO_RASTER_SRC } from '@/lib/brand';
 import { env } from '@/lib/env';
 import './globals.css';
@@ -32,9 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image', images: [BRAND_LOGO_RASTER_SRC] },
   icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
     apple: BRAND_LOGO_RASTER_SRC,
   },
 };
@@ -47,12 +46,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={sans.variable}>
-      <body className="min-h-screen flex flex-col">
+    <html lang="en" className={sans.variable} suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <StoreRehydration />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        {/*
+          SmoothScroll mounts Lenis once for the whole app. It's a Client
+          Component but happily wraps Server Component children (Header,
+          page content, Footer). It self-disables under reduced-motion.
+        */}
+        <SmoothScroll>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </SmoothScroll>
       </body>
     </html>
   );

@@ -33,9 +33,10 @@ export const dynamic = 'force-dynamic';
  * we don't return it anywhere visible to other parties, and we store it
  * hashed for abuse tracking.
  */
-export async function POST(req: NextRequest, { params }: { params: { uid: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ uid: string }> }) {
+  const { uid } = await params;
   return safe(async () => {
-    if (!isValidUid(params.uid)) return bad('NOT_FOUND', 'This tag does not exist.');
+    if (!isValidUid(uid)) return bad('NOT_FOUND', 'This tag does not exist.');
 
     const ip = getClientIp(req);
 
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: { uid: string
     if (!rateLimit(`contact:ip:${ip}`, env.RATE_LIMIT_CONTACT_PER_IP_PER_HOUR, 60 * 60_000)) {
       return bad('RATE_LIMITED', 'You have sent too many messages. Please wait an hour.');
     }
-    if (!rateLimit(`contact:tag:${params.uid}`, 30, 60 * 60_000)) {
+    if (!rateLimit(`contact:tag:${uid}`, 30, 60 * 60_000)) {
       return bad('RATE_LIMITED', 'Too many messages on this tag. Please try later.');
     }
 
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest, { params }: { params: { uid: string
     if (!parsed.success) return fromZod(parsed.error);
 
     await connectDB();
-    const tag = await TagModel.findOne({ uid: params.uid });
+    const tag = await TagModel.findOne({ uid });
     if (!tag) return bad('NOT_FOUND', 'This tag does not exist.');
     if (tag.status === 'PRINTED' || !tag.ownerId) {
       return bad('CONFLICT', 'This tag is not active yet.');

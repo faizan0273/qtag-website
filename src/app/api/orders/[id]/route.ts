@@ -6,17 +6,18 @@ import mongoose from 'mongoose';
 export const dynamic = 'force-dynamic';
 
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return safe(async () => {
     const user = await getCurrentUser();
     if (!user) return bad('UNAUTHORIZED', 'Please sign in.');
 
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!mongoose.isValidObjectId(id)) {
       return bad('NOT_FOUND', 'Order not found.');
     }
 
     await connectDB();
-    const order = await OrderModel.findById(params.id).lean();
+    const order = await OrderModel.findById(id).lean();
     if (!order) return bad('NOT_FOUND', 'Order not found.');
 
     // Authorization: only the buyer or an admin can view this

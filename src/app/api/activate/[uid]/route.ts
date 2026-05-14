@@ -17,9 +17,10 @@ export const dynamic = 'force-dynamic';
  *    (via OrderModel.tagUids), per original Car Tag flow.
  *  - DASHBOARD tags: same user who created the UID can activate without an order.
  */
-export async function POST(req: NextRequest, { params }: { params: { uid: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ uid: string }> }) {
+  const { uid } = await params;
   return safe(async () => {
-    if (!isValidUid(params.uid)) return bad('NOT_FOUND', 'This tag does not exist.');
+    if (!isValidUid(uid)) return bad('NOT_FOUND', 'This tag does not exist.');
 
     const user = await getCurrentUser();
     if (!user) return bad('UNAUTHORIZED', 'Please sign in to activate.');
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: { uid: string
     if (!raw) return bad('BAD_REQUEST', 'Invalid JSON body.');
 
     await connectDB();
-    const tagLean = await TagModel.findOne({ uid: params.uid }).lean();
+    const tagLean = await TagModel.findOne({ uid }).lean();
     if (!tagLean) return bad('NOT_FOUND', 'This tag does not exist.');
 
     const effectiveType = normalizeProductType((raw.productType as string) ?? tagLean.productType);
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: { uid: string
     const parsed = activateTagSchema.safeParse(merged);
     if (!parsed.success) return fromZod(parsed.error);
 
-    const tag = await TagModel.findOne({ uid: params.uid });
+    const tag = await TagModel.findOne({ uid });
     if (!tag) return bad('NOT_FOUND', 'This tag does not exist.');
 
     const body = parsed.data;

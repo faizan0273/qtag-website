@@ -19,18 +19,19 @@ export const dynamic = 'force-dynamic';
 export default async function JazzCashRedirectPage({
   params,
 }: {
-  params: { orderId: string };
+  params: Promise<{ orderId: string }>;
 }) {
+  const { orderId } = await params;
   if (!isJazzCashConfigured) {
     redirect('/checkout?error=jazzcash_not_configured');
   }
 
   const user = await getCurrentUser();
-  if (!user) redirect(`/login?next=/payments/jazzcash/${params.orderId}`);
-  if (!mongoose.isValidObjectId(params.orderId)) notFound();
+  if (!user) redirect(`/login?next=/payments/jazzcash/${orderId}`);
+  if (!mongoose.isValidObjectId(orderId)) notFound();
 
   await connectDB();
-  const order = await OrderModel.findById(params.orderId);
+  const order = await OrderModel.findById(orderId);
   if (!order) notFound();
   if (String(order.userId) !== user.id) notFound();
 

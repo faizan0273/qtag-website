@@ -8,12 +8,13 @@ import { TagModel } from '@/models/Tag';
 export const dynamic = 'force-dynamic';
 
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return safe(async () => {
     const user = await getCurrentUser();
     if (!user) return bad('UNAUTHORIZED', 'Please sign in.');
 
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!mongoose.isValidObjectId(id)) {
       return bad('NOT_FOUND', 'Tag not found.');
     }
 
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (!parsed.success) return fromZod(parsed.error);
 
     await connectDB();
-    const tag = await TagModel.findById(params.id);
+    const tag = await TagModel.findById(id);
     if (!tag) return bad('NOT_FOUND', 'Tag not found.');
 
     if (String(tag.ownerId) !== user.id) {

@@ -49,15 +49,18 @@ const cookieOptions = {
 };
 
 export async function setSessionCookie(token: string): Promise<void> {
-  cookies().set(SESSION_COOKIE, token, cookieOptions);
+  const store = await cookies();
+  store.set(SESSION_COOKIE, token, cookieOptions);
 }
 
 export async function clearSessionCookie(): Promise<void> {
-  cookies().delete(SESSION_COOKIE);
+  const store = await cookies();
+  store.delete(SESSION_COOKIE);
 }
 
 export async function readSessionFromCookies(): Promise<SessionPayload | null> {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const store = await cookies();
+  const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   return verifySession(token);
 }

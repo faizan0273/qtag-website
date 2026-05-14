@@ -15,15 +15,17 @@ export default async function OrderSuccessPage({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams?: { paid?: string; payment?: string; reason?: string; code?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ paid?: string; payment?: string; reason?: string; code?: string }>;
 }) {
+  const { id } = await params;
+  const sp = await searchParams;
   const user = await getCurrentUser();
   if (!user) notFound();
-  if (!mongoose.isValidObjectId(params.id)) notFound();
+  if (!mongoose.isValidObjectId(id)) notFound();
 
   await connectDB();
-  const order = await OrderModel.findById(params.id).lean();
+  const order = await OrderModel.findById(id).lean();
   if (!order) notFound();
   if (String(order.userId) !== user.id && user.role !== 'ADMIN') notFound();
 
@@ -31,9 +33,9 @@ export default async function OrderSuccessPage({
   const tagsReserved =
     typeof order.reservedTagCount === 'number' ? order.reservedTagCount : order.quantity;
 
-  const paymentFailed = searchParams?.payment === 'failed';
+  const paymentFailed = sp.payment === 'failed';
   const paymentJustPaid =
-    searchParams?.paid === '1' || order.paymentStatus === 'PAID';
+    sp.paid === '1' || order.paymentStatus === 'PAID';
   const isJazzCash = order.paymentMethod === 'JAZZCASH';
 
   return (
@@ -45,7 +47,7 @@ export default async function OrderSuccessPage({
             {order.paymentResponseMessage
               ? order.paymentResponseMessage
               : 'JazzCash couldn\'t complete the transaction.'}
-            {searchParams?.code ? ` (code ${searchParams.code})` : ''}
+            {sp.code ? ` (code ${sp.code})` : ''}
           </div>
           <a
             href={`/payments/jazzcash/${String(order._id)}`}

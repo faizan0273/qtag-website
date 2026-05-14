@@ -5,12 +5,13 @@ import { getCurrentUser } from '@/lib/auth';
 import { normalizeProductType } from '@/lib/product-type';
 import { ActivateTagForm } from '@/components/activate/ActivateTagForm';
 
-export default async function ActivatePage({ params }: { params: { uid: string } }) {
+export default async function ActivatePage({ params }: { params: Promise<{ uid: string }> }) {
+  const { uid } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect(`/login?next=${encodeURIComponent(`/t/${params.uid}/activate`)}`);
+  if (!user) redirect(`/login?next=${encodeURIComponent(`/t/${uid}/activate`)}`);
 
   await connectDB();
-  const tag = await TagModel.findOne({ uid: params.uid }).lean();
+  const tag = await TagModel.findOne({ uid }).lean();
 
   if (!tag) notFound();
 

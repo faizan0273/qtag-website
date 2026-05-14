@@ -8,12 +8,13 @@ import { updateProductDetails } from '@/lib/services/qr-product.service';
 export const dynamic = 'force-dynamic';
 
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return safe(async () => {
     const user = await getCurrentUser();
     if (!user) return bad('UNAUTHORIZED', 'Please sign in.');
 
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!mongoose.isValidObjectId(id)) {
       return bad('NOT_FOUND', 'Tag not found.');
     }
 
@@ -22,7 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!parsed.success) return fromZod(parsed.error);
 
     await connectDB();
-    const result = await updateProductDetails(params.id, user, {
+    const result = await updateProductDetails(id, user, {
       title: parsed.data.title,
       description: parsed.data.description,
       metadata: parsed.data.metadata,

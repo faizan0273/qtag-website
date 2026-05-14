@@ -8,6 +8,7 @@ export const metadata = {
   title: `${BRAND_NAME}, scan profile`,
 };
 
-export default function PublicScanSlugPage({ params }: { params: { slug: string } }) {
-  return <ScanPublicPage slug={params.slug} />;
+export default async function PublicScanSlugPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return <ScanPublicPage slug={slug} />;
 }

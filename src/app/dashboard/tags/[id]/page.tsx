@@ -19,15 +19,17 @@ export default async function TagDetailPage({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: { activated?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ activated?: string }>;
 }) {
+  const { id } = await params;
+  const { activated } = await searchParams;
   const user = await getCurrentUser();
   if (!user) notFound();
-  if (!mongoose.isValidObjectId(params.id)) notFound();
+  if (!mongoose.isValidObjectId(id)) notFound();
 
   await connectDB();
-  const tag = await TagModel.findById(params.id).lean<ITag & { _id: Types.ObjectId }>();
+  const tag = await TagModel.findById(id).lean<ITag & { _id: Types.ObjectId }>();
   if (!tag || String(tag.ownerId) !== user.id) notFound();
 
   const [scans, messages] = await Promise.all([
@@ -49,7 +51,7 @@ export default async function TagDetailPage({
 
   return (
     <div>
-      {searchParams.activated ? (
+      {activated ? (
         <div className="mb-6 px-4 py-3 rounded-xl bg-success/10 text-success">
           ✅ Tag activated! Test it by scanning the QR with your phone camera.
         </div>

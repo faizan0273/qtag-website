@@ -8,6 +8,7 @@ export const metadata = {
   title: `${BRAND_NAME}, tag profile`,
 };
 
-export default function PublicLegacyScan({ params }: { params: { uid: string } }) {
-  return <ScanPublicPage slug={params.uid} />;
+export default async function PublicLegacyScan({ params }: { params: Promise<{ uid: string }> }) {
+  const { uid } = await params;
+  return <ScanPublicPage slug={uid} />;
 }

@@ -2,9 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  experimental: {
-    serverComponentsExternalPackages: ['mongoose', 'bcryptjs'],
-  },
+  serverExternalPackages: ['mongoose', 'bcryptjs'],
   async headers() {
     return [
       {

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ScrollToHash } from '@/components/layout/ScrollToHash';
 import { StoreRehydration } from '@/components/providers/StoreRehydration';
 import { SmoothScroll } from '@/components/motion/SmoothScroll';
 import { BRAND_LOGO_RASTER_SRC } from '@/lib/brand';
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           page content, Footer). It self-disables under reduced-motion.
         */}
         <SmoothScroll>
+          <ScrollToHash />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />

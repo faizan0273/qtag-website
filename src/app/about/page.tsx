@@ -72,7 +72,7 @@ export default function AboutPage() {
           <Link href="/shop">
             <Button size="lg">Shop QR tags</Button>
           </Link>
-          <Link href="/#how">
+          <Link href="/#how" scroll={false}>
             <Button size="lg" variant="secondary">
               How tags work
             </Button>

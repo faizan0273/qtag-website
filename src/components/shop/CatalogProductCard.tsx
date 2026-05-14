@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { formatPkr } from '@/lib/constants';
@@ -121,6 +121,20 @@ export function CatalogProductCard({ product: p, onBuy }: Props) {
   const maxQtyByTags = Math.min(20, Math.floor(100 / p.tagsPerPack));
   const subtotal = p.pricePkr * qty;
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, [isOpen]);
+
   return (
     <>
       <Card
@@ -183,7 +197,8 @@ export function CatalogProductCard({ product: p, onBuy }: Props) {
           onClick={() => setIsOpen(false)}
         >
           <div
-            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[1.5rem] border border-paper-line bg-paper-card shadow-cardHover"
+            data-lenis-prevent
+            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto overscroll-contain rounded-[1.5rem] border border-paper-line bg-paper-card shadow-cardHover touch-pan-y"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-paper-line bg-paper-card/95 px-4 py-3 backdrop-blur sm:px-6">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { BRAND_LOGO_SRC, BRAND_NAME } from '@/lib/brand';
 import { EASE, SPRING } from '@/lib/motion';
@@ -21,12 +22,13 @@ import { EASE, SPRING } from '@/lib/motion';
  */
 
 const NAV_LINKS = [
-  { href: '/shop', label: 'Shop', section: 'shop' },
-  { href: '/#how', label: 'How it works', section: 'how' },
-  { href: '/#faq', label: 'FAQ', section: 'faq' },
-];
+  { href: '/shop', label: 'Shop', section: 'shop' as const, scroll: true },
+  { href: '/#how', label: 'How it works', section: 'how' as const, scroll: false },
+  { href: '/#faq', label: 'FAQ', section: 'faq' as const, scroll: false },
+] as const;
 
 export function HeaderShell({ authSlot }: { authSlot: React.ReactNode }) {
+  const pathname = usePathname();
   const reduceMotion = useReducedMotion();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -40,12 +42,16 @@ export function HeaderShell({ authSlot }: { authSlot: React.ReactNode }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Track which in-page section is in view, to drive the nav underline.
+  // Track which in-page section is in view on the home page (How / FAQ).
   useEffect(() => {
     const sections = ['how', 'faq']
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
-    if (sections.length === 0) return;
+
+    if (sections.length === 0) {
+      setActiveSection('');
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -53,13 +59,11 @@ export function HeaderShell({ authSlot }: { authSlot: React.ReactNode }) {
           if (entry.isIntersecting) setActiveSection(entry.target.id);
         });
       },
-      // A band across the middle of the viewport — a section is "active"
-      // while it occupies the centre of the screen.
       { rootMargin: '-45% 0px -50% 0px' },
     );
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
 
   // Lock body scroll while the mobile menu is open.
   useEffect(() => {
@@ -93,22 +97,32 @@ export function HeaderShell({ authSlot }: { authSlot: React.ReactNode }) {
 
         {/* Desktop navigation with shared-layout underline */}
         <nav className="hidden md:flex items-center gap-7 text-[15px] text-ink-soft">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="relative py-1 transition-colors hover:text-ink"
-            >
-              {link.label}
-              {activeSection === link.section && (
-                <motion.span
-                  layoutId="nav-underline"
-                  className="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-brand"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                />
-              )}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const onShop = link.section === 'shop' && pathname.startsWith('/shop');
+            const onHomeSection =
+              pathname === '/' &&
+              (link.section === 'how' || link.section === 'faq') &&
+              activeSection === link.section;
+            const showUnderline = onShop || onHomeSection;
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                scroll={link.scroll}
+                className="relative py-1 transition-colors hover:text-ink"
+              >
+                {link.label}
+                {showUnderline ? (
+                  <motion.span
+                    layoutId="nav-underline"
+                    className="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-brand"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  />
+                ) : null}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="hidden md:flex items-center gap-2">{authSlot}</div>
@@ -146,6 +160,7 @@ export function HeaderShell({ authSlot }: { authSlot: React.ReactNode }) {
                 >
                   <Link
                     href={link.href}
+                    scroll={link.scroll}
                     onClick={() => setMenuOpen(false)}
                     className="block px-3 py-3 rounded-lg text-ink hover:bg-paper-line/60"
                   >

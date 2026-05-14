@@ -28,8 +28,8 @@ export function Footer() {
             <div className="font-medium text-ink mb-3">Product</div>
             <ul className="space-y-2 text-ink-muted">
               <li><Link href="/shop" className="hover:text-ink">Shop tags</Link></li>
-              <li><Link href="/#how" className="hover:text-ink">How it works</Link></li>
-              <li><Link href="/#faq" className="hover:text-ink">FAQ</Link></li>
+              <li><Link href="/#how" scroll={false} className="hover:text-ink">How it works</Link></li>
+              <li><Link href="/#faq" scroll={false} className="hover:text-ink">FAQ</Link></li>
             </ul>
           </div>
         </StaggerItem>

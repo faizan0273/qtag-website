@@ -2,7 +2,7 @@
 
 const btnBase =
   'inline-flex items-center justify-center gap-2 font-medium tracking-tight transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 h-14 px-7 text-base rounded-xl w-full select-none';
-const primary = 'bg-brand text-white hover:bg-brand-dark active:bg-brand-dark';
+const primary = 'bg-brand text-ink hover:bg-brand-dark active:bg-brand-dark';
 const secondary =
   'bg-paper-card text-ink border border-paper-line hover:bg-paper hover:border-ink/20';
 

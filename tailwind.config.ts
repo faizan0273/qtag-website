@@ -12,14 +12,14 @@ const config: Config = {
           muted: '#5B6473',
         },
         paper: {
-          DEFAULT: '#FBFAF6', // warm off-white
+          DEFAULT: '#F5F0E8',
           card: '#FFFFFF',
-          line: '#E8E5DD',
+          line: '#E5DDD0',
         },
         brand: {
-          DEFAULT: '#5B5FE9', // indigo
-          dark: '#3F44C9',
-          soft: '#EEF0FF',
+          DEFAULT: '#F2B11C',
+          dark: '#D9A016',
+          soft: '#FCF3DC',
         },
         success: '#16A34A',
         danger: '#DC2626',

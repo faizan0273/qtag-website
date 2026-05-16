@@ -35,7 +35,7 @@ export async function Header() {
       </Link>
       <Link
         href="/shop"
-        className="text-[15px] px-4 h-10 flex items-center rounded-lg bg-ink text-paper transition-colors hover:bg-ink-soft"
+        className="text-[15px] px-4 h-10 flex items-center rounded-lg bg-brand text-ink transition-colors hover:bg-brand-dark"
       >
         Shop tags
       </Link>

@@ -13,7 +13,7 @@ import { SPRING } from '@/lib/motion';
 /**
  * Decorative animated background for the hero section.
  *
- * - Two large, blurred indigo blobs drift slowly on a loop.
+ * - Two large, blurred gold blobs drift slowly on a loop.
  * - A horizontal “wash” layer breathes in the mid-field.
  * - A soft light follows the cursor across the hero.
  *
@@ -62,7 +62,7 @@ export function HeroGlow() {
         className="absolute inset-0 opacity-[0.55]"
         style={{
           background:
-            'radial-gradient(ellipse 85% 70% at 50% -10%, rgba(99, 102, 241, 0.14), transparent 55%), radial-gradient(ellipse 60% 50% at 100% 100%, rgba(99, 102, 241, 0.08), transparent 50%)',
+            'radial-gradient(ellipse 85% 70% at 50% -10%, rgba(242, 177, 28, 0.14), transparent 55%), radial-gradient(ellipse 60% 50% at 100% 100%, rgba(242, 177, 28, 0.08), transparent 50%)',
         }}
       />
 

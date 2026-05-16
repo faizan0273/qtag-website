@@ -77,8 +77,8 @@ export function HeaderShell({ authSlot }: { authSlot: React.ReactNode }) {
     <motion.header
       initial={false}
       animate={{
-        backgroundColor: scrolled ? 'rgba(251, 250, 246, 0.85)' : 'rgba(251, 250, 246, 0)',
-        borderColor: scrolled ? 'rgba(232, 229, 221, 1)' : 'rgba(232, 229, 221, 0)',
+        backgroundColor: scrolled ? 'rgba(245, 240, 232, 0.85)' : 'rgba(245, 240, 232, 0)',
+        borderColor: scrolled ? 'rgba(229, 221, 208, 1)' : 'rgba(229, 221, 208, 0)',
       }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="sticky top-0 z-50 border-b backdrop-blur-md"

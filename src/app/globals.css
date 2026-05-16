@@ -16,7 +16,7 @@
 
   ::selection {
     background: theme('colors.brand.DEFAULT');
-    color: white;
+    color: theme('colors.ink.DEFAULT');
   }
 
   h1, h2, h3, h4 {
@@ -55,7 +55,7 @@
     background-image: linear-gradient(
       120deg,
       theme('colors.brand.DEFAULT'),
-      #8b8ff5 55%,
+      #f5c84a 55%,
       theme('colors.brand.dark')
     );
     -webkit-background-clip: text;

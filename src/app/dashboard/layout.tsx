@@ -44,7 +44,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             )}
             <Link
               href="/shop"
-              className="lg:mt-4 px-3 py-2 rounded-lg text-[15px] bg-ink text-paper hover:bg-ink-soft text-center whitespace-nowrap"
+              className="lg:mt-4 px-3 py-2 rounded-lg text-[15px] bg-brand text-ink hover:bg-brand-dark text-center whitespace-nowrap"
             >
               Buy more
             </Link>

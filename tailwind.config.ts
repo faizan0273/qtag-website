@@ -31,6 +31,7 @@ const config: Config = {
       },
       fontSize: {
         // Tighter, more editorial scale
+        'display-2xl': ['clamp(3.5rem, 9vw, 7rem)', { lineHeight: '0.95', letterSpacing: '-0.04em' }],
         'display-xl': ['clamp(2.75rem, 6vw, 4.5rem)', { lineHeight: '1.02', letterSpacing: '-0.03em' }],
         'display-lg': ['clamp(2rem, 4.5vw, 3rem)', { lineHeight: '1.05', letterSpacing: '-0.025em' }],
         'display-md': ['clamp(1.5rem, 3vw, 2rem)', { lineHeight: '1.15', letterSpacing: '-0.02em' }],

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getCurrentSession } from '@/lib/auth';
 import { LogoutButton } from './LogoutButton';
 import { HeaderShell } from './HeaderShell';
+import { PromoBar } from './PromoBar';
 
 /**
  * Server Component: fetches the session, then hands the rendered auth
@@ -42,5 +43,10 @@ export async function Header() {
     </>
   );
 
-  return <HeaderShell authSlot={authSlot} />;
+  return (
+    <>
+      <PromoBar />
+      <HeaderShell authSlot={authSlot} />
+    </>
+  );
 }

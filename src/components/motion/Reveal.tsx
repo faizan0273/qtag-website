@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 import { DURATION, EASE, VIEWPORT } from '@/lib/motion';
 
 const motionEl = motion as unknown as Record<string, typeof motion.div>;

@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
+import { resolveDevTagUid } from '@/lib/dev-test-tags';
 import { ok, bad, fromZod, getClientIp, safe } from '@/lib/api-helpers';
 import { contactMessageSchema } from '@/lib/validation';
 import { isValidUid } from '@/lib/uid';
@@ -12,7 +13,7 @@ import { contactMessageItemLabel } from '@/lib/services/qr-product.service';
 import { normalizeProductType } from '@/lib/product-type';
 import { rateLimit } from '@/lib/rate-limit';
 import { env } from '@/lib/env';
-import { notifyOwner } from '@/lib/whatsapp';
+import { notifyOwner, notifyOwnerRelay } from '@/lib/whatsapp';
 import { normalizePkPhone } from '@/lib/phone';
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,8 @@ export const dynamic = 'force-dynamic';
  * hashed for abuse tracking.
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ uid: string }> }) {
-  const { uid } = await params;
+  const { uid: rawUid } = await params;
+  const uid = resolveDevTagUid(rawUid);
   return safe(async () => {
     if (!isValidUid(uid)) return bad('NOT_FOUND', 'This tag does not exist.');
 
@@ -88,15 +90,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ uid
 
     // 2. Build the message that the owner will read on WhatsApp
     const vehicleLabel = contactMessageItemLabel(tag);
+    const messageBody = parsed.data.body.trim();
+    const allowDirect = Boolean(owner.isPhoneNumberAllow);
 
-    const finderLine = finderPhone
-      ? `\n\n📞 Finder shared their number: ${finderPhone}`
-      : '\n\n(The finder did not share their number.)';
-
-    const fullBody = parsed.data.body.trim() + finderLine;
-
-    // 3. Notify owner on WhatsApp
-    const delivery = await notifyOwner(owner.phone, vehicleLabel, fullBody);
+    const delivery = allowDirect
+      ? await notifyOwner(
+          owner.phone,
+          vehicleLabel,
+          finderPhone ? `${messageBody}\n\n📞 Finder shared: ${finderPhone}` : messageBody,
+        )
+      : await notifyOwnerRelay(owner.phone, vehicleLabel, messageBody, finderPhone);
 
     // 4. Persist the message
     await MessageModel.create({
@@ -104,7 +107,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ uid
       ownerId: owner._id,
       scanId: scan._id,
       direction: 'FINDER_TO_OWNER',
-      body: parsed.data.body.trim(),
+      body: messageBody,
       finderPhoneHash,
       delivered: delivery.ok,
       deliveryError: delivery.error,

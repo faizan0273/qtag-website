@@ -1,20 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { Suspense, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useSessionStore } from '@/store/session-store';
+import { resolvePostLoginPath } from '@/lib/shopify-embed';
+import { DEV_FAST_OTP } from '@/lib/dev-auth';
 
-export default function VerifyPage() {
+function VerifyForm() {
   const router = useRouter();
   const search = useSearchParams();
   const phone = search.get('phone') ?? '';
-  const next = search.get('next') ?? '/dashboard';
-  const devCode = search.get('devCode');
+  const nextParam = search.get('next');
+  const postLogin = resolvePostLoginPath(nextParam);
+  const devCodeFromUrl = search.get('devCode');
 
-  const [code, setCode] = useState(devCode ?? '');
+  const [code, setCode] = useState(devCodeFromUrl ?? '');
   const [error, setError] = useState<string | null>(null);
   const [resendIn, setResendIn] = useState(30);
   const [resending, setResending] = useState(false);
@@ -26,6 +29,10 @@ export default function VerifyPage() {
   }, [phone, router]);
 
   useEffect(() => {
+    if (devCodeFromUrl) setCode(devCodeFromUrl);
+  }, [devCodeFromUrl]);
+
+  useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
@@ -35,7 +42,7 @@ export default function VerifyPage() {
     return () => clearTimeout(t);
   }, [resendIn]);
 
-  function submit(e: React.FormEvent) {
+  function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     startVerify(async () => {
@@ -53,7 +60,11 @@ export default function VerifyPage() {
         if (json.data?.user) {
           useSessionStore.getState().setSessionFromVerify(json.data.user);
         }
-        router.push(next);
+        if (DEV_FAST_OTP) {
+          window.location.assign(postLogin);
+          return;
+        }
+        router.push(postLogin);
         router.refresh();
       } catch {
         setError('Network error. Please try again.');
@@ -76,6 +87,7 @@ export default function VerifyPage() {
         setError(json.error?.message ?? 'Could not resend.');
         return;
       }
+      if (json.data?.devCode) setCode(json.data.devCode);
       setResendIn(30);
     } finally {
       setResending(false);
@@ -87,20 +99,35 @@ export default function VerifyPage() {
       <Card padding="lg">
         <h1 className="font-display text-display-md text-ink">Enter the code</h1>
         <p className="mt-2 text-ink-soft">
-          We sent a 6-digit code on WhatsApp to{' '}
-          <span className="text-ink font-medium tnum">{phone}</span>.
+          {DEV_FAST_OTP ? (
+            <>
+              Dev OTP for <span className="text-ink font-medium tnum">{phone}</span> (pre-filled below).
+            </>
+          ) : (
+            <>
+              We sent a 6-digit code on WhatsApp to{' '}
+              <span className="text-ink font-medium tnum">{phone}</span>.
+            </>
+          )}
         </p>
 
-        {devCode ? (
+        {DEV_FAST_OTP || devCodeFromUrl ? (
           <div className="mt-4 px-4 py-3 rounded-xl bg-brand-soft text-brand text-sm">
-            <span className="font-semibold">Dev mode:</span> the code is{' '}
-            <span className="font-mono tnum">{devCode}</span>.
+            <span className="font-semibold">Dev mode:</span>{' '}
+            {devCodeFromUrl ? (
+              <>
+                code <span className="font-mono tnum">{devCodeFromUrl}</span>
+              </>
+            ) : (
+              'Check the terminal if the code is not filled in.'
+            )}
           </div>
         ) : null}
 
         <form onSubmit={submit} className="mt-8 space-y-5">
           <input
             ref={inputRef}
+            name="code"
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
@@ -125,7 +152,16 @@ export default function VerifyPage() {
         </form>
 
         <div className="mt-6 flex items-center justify-between text-sm">
-          <Link href="/login" className="text-ink-muted hover:text-ink">
+          <Link
+            href={
+              nextParam
+                ? `/login?next=${encodeURIComponent(nextParam)}`
+                : postLogin.startsWith('/t/')
+                  ? `/login?next=${encodeURIComponent(postLogin)}`
+                  : '/login'
+            }
+            className="text-ink-muted hover:text-ink"
+          >
             ← Use a different number
           </Link>
           <button
@@ -139,5 +175,23 @@ export default function VerifyPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+function VerifyFallback() {
+  return (
+    <div className="container-page py-12 md:py-20 max-w-md">
+      <Card padding="lg">
+        <p className="text-ink-soft">Loading verification…</p>
+      </Card>
+    </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<VerifyFallback />}>
+      <VerifyForm />
+    </Suspense>
   );
 }

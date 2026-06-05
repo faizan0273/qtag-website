@@ -1,0 +1,15 @@
+# Local MongoDB for Qtag development (persistent data).
+# Start: docker compose up -d
+# Stop:  docker compose down
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - qtag_mongo_data:/data/db
+
+volumes:
+  qtag_mongo_data:

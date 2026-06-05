@@ -20,17 +20,13 @@ import { notifyOwnerQrScan } from '@/lib/whatsapp';
 import { sendSms } from '@/lib/sms';
 import type { NextRequest } from 'next/server';
 import { getClientIp } from '@/lib/api-helpers';
+import { isDevTestTag } from '@/lib/dev-test-tags';
 
 export interface CurrentUserLite {
   _id: Types.ObjectId;
 }
 
 export type PublicScanState = Exclude<TagStatus, never>;
-
-export interface PublicContactLinks {
-  tel: string;
-  whatsappHref: string;
-}
 
 export interface PublicScanView {
   state: PublicScanState;
@@ -47,7 +43,9 @@ export interface PublicScanView {
     color: string;
   };
   ownerPhoneMasked?: string;
-  contactLinks?: PublicContactLinks | null;
+  /** Owner opted in — finder may open WhatsApp to contact them directly */
+  isPhoneNumberAllow?: boolean;
+  whatsappHref?: string | null;
   rewardPkr?: number | null;
   lastSeenCity?: string | null;
   lostMessage?: string | null;
@@ -81,13 +79,14 @@ export function isPublicProfileLive(status: TagStatus, ownerId?: Types.ObjectId)
   return status !== 'PRINTED' && status !== 'DISABLED';
 }
 
-function ownerLinks(phone: string): PublicContactLinks {
+function ownerWhatsAppHref(phone: string): string {
   const digits = phone.replace(/\D/g, '');
-  const text = encodeURIComponent(`Hello, I scanned your Qtag tag.`);
-  return {
-    tel: `tel:${phone}`,
-    whatsappHref: `https://wa.me/${digits}?text=${text}`,
-  };
+  const text = encodeURIComponent('Hello, I scanned your Qtag tag.');
+  return `https://wa.me/${digits}?text=${text}`;
+}
+
+function userAllowsDirectPhone(owner: IUser): boolean {
+  return Boolean(owner.isPhoneNumberAllow);
 }
 
 async function allocateUniqueUid(): Promise<string> {
@@ -108,7 +107,9 @@ export async function getTagByPublicSlug(uid: string) {
 /**
  * Server-side public projection for `/scan/[slug]` and `/t/[uid]` (never expose raw phone beyond optional contact links).
  */
-export async function getPublicProfile(slug: string): Promise<PublicScanView | null> {
+export async function getPublicProfile(rawSlug: string): Promise<PublicScanView | null> {
+  const { resolveDevTagUid } = await import('@/lib/dev-test-tags');
+  const slug = resolveDevTagUid(rawSlug);
   if (!isValidUid(slug)) return null;
 
   const tag = await TagModel.findOne({ uid: slug }).lean<ITag>();
@@ -159,7 +160,8 @@ export async function getPublicProfile(slug: string): Promise<PublicScanView | n
         }
       : undefined,
     ownerPhoneMasked: maskPhone(owner.phone),
-    contactLinks: isPublicProfileLive(tag.status, tag.ownerId) ? ownerLinks(owner.phone) : null,
+    isPhoneNumberAllow: userAllowsDirectPhone(owner),
+    whatsappHref: userAllowsDirectPhone(owner) ? ownerWhatsAppHref(owner.phone) : null,
     rewardPkr: tag.rewardPkr ?? null,
     lastSeenCity: tag.lastSeenCity ?? null,
     lostMessage: tag.lostMessage ?? null,
@@ -213,7 +215,9 @@ export async function activateQR(
     return { ok: false as const, code: 'CONFLICT' as const, message: 'This tag has already been activated.' };
   }
 
-  if (tag.origin === 'ORDER') {
+  const devTest = isDevTestTag(tag.metadata);
+
+  if (!devTest && tag.origin === 'ORDER') {
     if (!tag.orderId) {
       return { ok: false as const, code: 'FORBIDDEN' as const, message: 'This tag is not linked to any order.' };
     }
@@ -228,7 +232,7 @@ export async function activateQR(
         message: 'This tag belongs to another order. If you bought it, contact support.',
       };
     }
-  } else {
+  } else if (!devTest) {
     if (!tag.createdByUserId || String(tag.createdByUserId) !== String(user._id)) {
       return { ok: false as const, code: 'FORBIDDEN' as const, message: 'You can only activate tags you created.' };
     }

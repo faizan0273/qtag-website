@@ -7,7 +7,7 @@ import { env } from './env';
  *   1. Set SMS_PROVIDER, SMS_API_KEY, SMS_SENDER_ID in your .env
  *   2. Add a case for your provider below.
  *
- * Recommended for Pakistan: Branded.com.pk, Veevotech, Bizsms.pk, or Twilio.
+ * Recommended for Pakistan: Branded.com.pk, Veevotech, or Bizsms.pk.
  */
 
 interface SmsResult {

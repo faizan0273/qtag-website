@@ -1,11 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import {
+  SHOPIFY_EMBED_MODE,
+  defaultActivatePath,
+  isEmbedAllowedPath,
+} from '@/lib/shopify-embed';
 
 /**
- * Edge middleware — runs on every request.
- *
- * We can't import lib/auth here because it pulls in mongoose (Node-only).
- * So we reimplement the session check inline using `jose` directly.
+ * Edge middleware — Shopify embed: block shop/dashboard; auth-gate activate only.
+ * Public scan /t/{uid} and /scan/{uid} stay open (router decides activate vs contact).
  */
 
 const SESSION_COOKIE = 'qrs_session';
@@ -25,14 +28,20 @@ async function isAuthed(req: NextRequest): Promise<boolean> {
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  // Routes that require an authenticated user
-  const isProtected =
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/checkout') ||
-    pathname.startsWith('/payments/') ||
-    pathname.match(/^\/t\/[^/]+\/activate$/);
+  if (
+    SHOPIFY_EMBED_MODE &&
+    !pathname.startsWith('/api') &&
+    !isEmbedAllowedPath(pathname)
+  ) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
 
-  if (isProtected) {
+  const isActivate = Boolean(pathname.match(/^\/t\/[^/]+\/activate$/));
+
+  if (isActivate) {
     const authed = await isAuthed(req);
     if (!authed) {
       const url = req.nextUrl.clone();
@@ -42,13 +51,36 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // If logged in, /login and /verify should bounce to dashboard
   if (pathname === '/login' || pathname === '/verify') {
     if (await isAuthed(req)) {
-      const url = req.nextUrl.clone();
-      url.pathname = '/dashboard';
-      url.search = '';
-      return NextResponse.redirect(url);
+      const next = req.nextUrl.searchParams.get('next');
+      if (
+        next &&
+        next.startsWith('/') &&
+        !next.startsWith('//') &&
+        isEmbedAllowedPath(next.split('?')[0] ?? next)
+      ) {
+        const url = req.nextUrl.clone();
+        url.pathname = next.split('?')[0]!;
+        url.search = next.includes('?') ? next.slice(next.indexOf('?')) : '';
+        return NextResponse.redirect(url);
+      }
+      if (SHOPIFY_EMBED_MODE && process.env.NODE_ENV === 'development') {
+        const url = req.nextUrl.clone();
+        url.pathname = '/dev/qr';
+        url.search = '';
+        return NextResponse.redirect(url);
+      }
+      if (SHOPIFY_EMBED_MODE) {
+        const activate = defaultActivatePath();
+        if (activate) {
+          const url = req.nextUrl.clone();
+          url.pathname = activate;
+          url.search = '';
+          return NextResponse.redirect(url);
+        }
+      }
+      return NextResponse.next();
     }
   }
 
@@ -57,11 +89,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/checkout/:path*',
-    '/payments/:path*',
-    '/t/:uid/activate',
-    '/login',
-    '/verify',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };

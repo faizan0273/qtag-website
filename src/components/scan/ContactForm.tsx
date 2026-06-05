@@ -10,6 +10,8 @@ interface Props {
   uid: string;
   isLost: boolean;
   productType: ProductType;
+  relayMode?: boolean;
+  companyContactPhone?: string | null;
 }
 
 function copy(productType: ProductType, isLost: boolean): { headline: string; placeholder: string; geoHint?: string } {
@@ -77,7 +79,13 @@ function copy(productType: ProductType, isLost: boolean): { headline: string; pl
   }
 }
 
-export function ContactForm({ uid, isLost, productType }: Props) {
+export function ContactForm({
+  uid,
+  isLost,
+  productType,
+  relayMode = true,
+  companyContactPhone,
+}: Props) {
   const [body, setBody] = useState('');
   const [finderPhone, setFinderPhone] = useState('');
   const [shareLocation, setShareLocation] = useState(false);
@@ -131,7 +139,11 @@ export function ContactForm({ uid, isLost, productType }: Props) {
         <div className="text-4xl mb-3">✅</div>
         <h2 className="font-display text-xl text-ink">Message sent</h2>
         <p className="mt-2 text-ink-soft">
-          The owner has been notified on WhatsApp. Thank you for being kind.
+          {relayMode
+            ? companyContactPhone
+              ? `The owner was notified on WhatsApp from our company number (${companyContactPhone}). Thank you for being kind.`
+              : `The owner was notified on WhatsApp through ${BRAND_NAME}. Thank you for being kind.`
+            : 'The owner has been notified on WhatsApp. Thank you for being kind.'}
         </p>
       </div>
     );
@@ -199,7 +211,11 @@ export function ContactForm({ uid, isLost, productType }: Props) {
           {isLost ? 'Notify owner now' : 'Send message'}
         </Button>
         <p className="text-xs text-ink-muted text-center">
-          Your message goes to the owner through {BRAND_NAME}.
+          {relayMode
+            ? companyContactPhone
+              ? `Your message is sent to the owner from ${BRAND_NAME} (${companyContactPhone}), not from your SIM.`
+              : `Your message is relayed to the owner through ${BRAND_NAME}, not from your SIM.`
+            : `Your message goes to the owner through ${BRAND_NAME}.`}
           {finderPhone ? ' Your number is shared with the owner only.' : " You haven't shared your number."}
         </p>
       </form>

@@ -1,4 +1,7 @@
+/** DISABLED — Shopify embed mode. See src/lib/shopify-embed.ts */
 import type { NextRequest } from 'next/server';
+import { SHOPIFY_EMBED_MODE } from '@/lib/shopify-embed';
+import { embedApiDisabled } from '@/lib/embed-api-disabled';
 import { ok, bad, fromZod, safe } from '@/lib/api-helpers';
 import { createDashboardTagSchema } from '@/lib/validation';
 import { getCurrentUser } from '@/lib/auth';
@@ -10,6 +13,7 @@ export const dynamic = 'force-dynamic';
 
 
 export async function POST(req: NextRequest) {
+  if (SHOPIFY_EMBED_MODE) return embedApiDisabled();
   return safe(async () => {
     const user = await getCurrentUser();
     if (!user) return bad('UNAUTHORIZED', 'Please sign in to create tags.');
@@ -46,6 +50,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
+  if (SHOPIFY_EMBED_MODE) return embedApiDisabled();
   return safe(async () => {
     const user = await getCurrentUser();
     if (!user) return bad('UNAUTHORIZED', 'Please sign in.');

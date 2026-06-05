@@ -1,3 +1,6 @@
+/** DISABLED — Shopify embed mode. See src/lib/shopify-embed.ts */
+import { SHOPIFY_EMBED_MODE } from '@/lib/shopify-embed';
+import { embedApiDisabled } from '@/lib/embed-api-disabled';
 import mongoose from 'mongoose';
 import { ok, bad, safe } from '@/lib/api-helpers';
 import { getCurrentUser } from '@/lib/auth';
@@ -7,6 +10,7 @@ export const dynamic = 'force-dynamic';
 
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (SHOPIFY_EMBED_MODE) return embedApiDisabled();
   const { id } = await params;
   return safe(async () => {
     const user = await getCurrentUser();

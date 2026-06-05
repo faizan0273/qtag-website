@@ -8,6 +8,8 @@ export interface IUser {
   role: 'USER' | 'ADMIN';
   status: 'ACTIVE' | 'SUSPENDED';
   locale: 'en' | 'ur';
+  /** When true, finders can open WhatsApp to this user's number from the scan page. */
+  isPhoneNumberAllow: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +25,7 @@ const UserSchema = new Schema<IUser>(
     role: { type: String, enum: ['USER', 'ADMIN'], default: 'USER', index: true },
     status: { type: String, enum: ['ACTIVE', 'SUSPENDED'], default: 'ACTIVE', index: true },
     locale: { type: String, enum: ['en', 'ur'], default: 'en' },
+    isPhoneNumberAllow: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

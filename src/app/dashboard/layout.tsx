@@ -1,3 +1,4 @@
+/** DISABLED — Shopify embed mode redirects /dashboard to /login via middleware. */
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';

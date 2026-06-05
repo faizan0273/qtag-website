@@ -1,3 +1,7 @@
+/**
+ * Full marketing header — unused while SHOPIFY_EMBED_MODE is true (see EmbedHeader).
+ * Restore in layout.tsx when re-enabling the full app.
+ */
 import Link from 'next/link';
 import { getCurrentSession } from '@/lib/auth';
 import { LogoutButton } from './LogoutButton';

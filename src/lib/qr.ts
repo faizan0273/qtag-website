@@ -1,26 +1,30 @@
 import QRCode from 'qrcode';
-import { env } from './env';
+import { getPublicAppBaseUrl, tagActivateUrl, tagPublicProfileUrl } from './qr-base-url';
 
 /** Legacy URL on physical Car Tag stickers shipped before multi-product rollout. */
 export function tagPublicUrl(uid: string): string {
-  return `${env.NEXT_PUBLIC_APP_URL}/t/${uid}`;
+  return tagPublicProfileUrl(uid);
 }
 
 /** Preferred scan URL — unified public profile (/scan vs legacy /t for shipped stickers). */
 export function tagScanUrl(uid: string): string {
-  return `${env.NEXT_PUBLIC_APP_URL}/scan/${uid}`;
+  return `${getPublicAppBaseUrl()}/scan/${uid}`;
 }
+
+export { tagActivateUrl };
 
 /** Generate a PNG data URL for a tag — used in admin previews and order receipts. */
 export async function generateTagQrDataUrl(
   uid: string,
-  options?: { width?: number; urlVariant?: 'legacy' | 'scan' },
+  options?: { width?: number; urlVariant?: 'legacy' | 'scan' | 'activate' },
 ): Promise<string> {
   const width = options?.width ?? 512;
   const target =
-    options?.urlVariant === 'scan'
-      ? tagScanUrl(uid)
-      : tagPublicUrl(uid);
+    options?.urlVariant === 'activate'
+      ? tagActivateUrl(uid)
+      : options?.urlVariant === 'scan'
+        ? tagScanUrl(uid)
+        : tagPublicUrl(uid);
 
   return QRCode.toDataURL(target, {
     errorCorrectionLevel: 'H', // tolerates dirt and scratches on a windshield

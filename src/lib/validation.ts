@@ -69,6 +69,7 @@ export const activateTagSchema = z
       .string()
       .min(1, 'Display name is required')
       .max(40, 'Keep it short, first name and initial is fine'),
+    isPhoneNumberAllow: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     const pt = data.productType ?? 'CAR';

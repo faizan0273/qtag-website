@@ -1,4 +1,7 @@
+/** DISABLED — Shopify embed mode. See src/lib/shopify-embed.ts */
 import { NextResponse, type NextRequest } from 'next/server';
+import { SHOPIFY_EMBED_MODE } from '@/lib/shopify-embed';
+import { embedApiDisabled } from '@/lib/embed-api-disabled';
 import { connectDB } from '@/lib/db';
 import { OrderModel } from '@/models/Order';
 import { verifyJazzCashResponse, type JazzCashFields } from '@/lib/jazzcash';
@@ -96,11 +99,13 @@ async function handle(req: NextRequest): Promise<NextResponse> {
 }
 
 export async function POST(req: NextRequest) {
+  if (SHOPIFY_EMBED_MODE) return embedApiDisabled();
   return handle(req);
 }
 
 // Some flows return via GET with query params (older JazzCash configs).
 export async function GET(req: NextRequest) {
+  if (SHOPIFY_EMBED_MODE) return embedApiDisabled();
   return handle(req);
 }
 

@@ -1,4 +1,7 @@
+/** DISABLED — Shopify embed mode. See src/lib/shopify-embed.ts */
 import type { NextRequest } from 'next/server';
+import { SHOPIFY_EMBED_MODE } from '@/lib/shopify-embed';
+import { embedApiDisabled } from '@/lib/embed-api-disabled';
 import mongoose from 'mongoose';
 import { ok, bad, fromZod, safe } from '@/lib/api-helpers';
 import { markLostSchema } from '@/lib/validation';
@@ -9,6 +12,7 @@ export const dynamic = 'force-dynamic';
 
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (SHOPIFY_EMBED_MODE) return embedApiDisabled();
   const { id } = await params;
   return safe(async () => {
     const user = await getCurrentUser();

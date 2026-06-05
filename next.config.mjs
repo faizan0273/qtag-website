@@ -3,6 +3,13 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   serverExternalPackages: ['mongoose', 'bcryptjs'],
+  /** Allow phone on LAN to load Next dev assets (HMR, chunks) from this host. */
+  allowedDevOrigins: [
+    '192.168.2.103',
+    '192.168.1.132',
+    'localhost',
+    '127.0.0.1',
+  ],
   async headers() {
     return [
       {
@@ -18,7 +25,7 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(self)',
+            value: 'camera=(), microphone=(self), geolocation=(self)',
           },
         ],
       },

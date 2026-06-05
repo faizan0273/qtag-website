@@ -7,14 +7,17 @@ const secondary =
   'bg-paper-card text-ink border border-paper-line hover:bg-paper hover:border-ink/20';
 
 interface Props {
-  telHref?: string;
-  whatsappHref?: string;
+  isPhoneNumberAllow: boolean;
+  whatsappHref?: string | null;
+  companyContactPhone?: string | null;
 }
 
-export function ScanActionsBar({ telHref, whatsappHref }: Props) {
-  if (!telHref && !whatsappHref) return null;
-
-  function reportFoundClick() {
+export function ScanActionsBar({
+  isPhoneNumberAllow,
+  whatsappHref,
+  companyContactPhone,
+}: Props) {
+  function scrollToMessage() {
     const el = document.getElementById('qtag-contact');
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.setTimeout(() => {
@@ -27,12 +30,7 @@ export function ScanActionsBar({ telHref, whatsappHref }: Props) {
     <div className="mt-8 space-y-3">
       <p className="text-xs uppercase tracking-widest text-ink-muted text-center">Reach the owner</p>
       <div className="grid grid-cols-1 gap-2">
-        {telHref ? (
-          <a href={telHref} className={`${btnBase} ${secondary} tnum`}>
-            Call owner
-          </a>
-        ) : null}
-        {whatsappHref ? (
+        {isPhoneNumberAllow && whatsappHref ? (
           <a
             href={whatsappHref}
             target="_blank"
@@ -42,12 +40,16 @@ export function ScanActionsBar({ telHref, whatsappHref }: Props) {
             WhatsApp owner
           </a>
         ) : null}
-        <button type="button" className={`${btnBase} ${secondary}`} onClick={reportFoundClick}>
-          Report found item
+        <button type="button" className={`${btnBase} ${secondary}`} onClick={scrollToMessage}>
+          Message the owner
         </button>
       </div>
       <p className="text-xs text-ink-muted text-center">
-        Tap call or WhatsApp only if you're comfortable reaching out directly, your number stays private unless you choose to share it below.
+        {isPhoneNumberAllow
+          ? 'The owner allows direct WhatsApp contact. You can also send a secure in-app message below.'
+          : companyContactPhone
+            ? `Messages are relayed from our company number (${companyContactPhone}). Your SIM stays hidden unless you choose to share it below.`
+            : 'Messages are relayed through our company WhatsApp number. Your SIM stays hidden unless you choose to share it below.'}
       </p>
     </div>
   );

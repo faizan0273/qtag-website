@@ -14,6 +14,8 @@ const EnvSchema = z.object({
   // App
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_BRAND_NAME: z.string().default('Qtag'),
+  /** Shown in relay messages, e.g. 03261548853 — messages are sent from your WhatsApp Business number. */
+  NEXT_PUBLIC_COMPANY_CONTACT_PHONE: z.string().optional(),
 
   // Database
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
@@ -52,6 +54,13 @@ const EnvSchema = z.object({
   RATE_LIMIT_OTP_PER_PHONE_PER_15M: z.coerce.number().int().positive().default(3),
   RATE_LIMIT_OTP_PER_IP_PER_HOUR: z.coerce.number().int().positive().default(10),
   RATE_LIMIT_CONTACT_PER_IP_PER_HOUR: z.coerce.number().int().positive().default(20),
+  RATE_LIMIT_CALL_PER_IP_PER_HOUR: z.coerce.number().int().positive().default(10),
+
+  // WebRTC audio calls (optional TURN improves mobile-network reliability)
+  NEXT_PUBLIC_WEBRTC_STUN_URL: z.string().default('stun:stun.l.google.com:19302'),
+  WEBRTC_TURN_URL: z.string().optional(),
+  WEBRTC_TURN_USERNAME: z.string().optional(),
+  WEBRTC_TURN_CREDENTIAL: z.string().optional(),
   /** Minimum ms between owner push notifications for beacon scans (same tag). 0 = every scan. */
   SCAN_NOTIFY_COOLDOWN_MS: z.coerce.number().int().nonnegative().default(600_000),
 

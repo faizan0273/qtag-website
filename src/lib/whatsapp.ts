@@ -203,3 +203,48 @@ export async function notifyOwner(
 
   return sendWhatsAppMessage(toE164, body);
 }
+
+/**
+ * Privacy relay — owner has not allowed direct phone/WhatsApp on the scan page.
+ * Delivered from the Qtag business WhatsApp number, not the finder's SIM.
+ */
+export async function notifyOwnerRelay(
+  toE164: string,
+  itemLabel: string,
+  finderMessage: string,
+  finderPhone?: string | null,
+): Promise<SendResult> {
+  const when = new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' });
+  const companyPhone = env.NEXT_PUBLIC_COMPANY_CONTACT_PHONE?.trim();
+  const fromLine = companyPhone
+    ? `${env.NEXT_PUBLIC_BRAND_NAME} (${companyPhone})`
+    : env.NEXT_PUBLIC_BRAND_NAME;
+
+  const finderLine = finderPhone
+    ? `\n\nFinder contact (shared with you): ${finderPhone}`
+    : '\n\n(Finder did not share their number.)';
+
+  const body =
+    `🔔 ${fromLine}\n\n` +
+    `Someone scanned your ${itemLabel} tag and sent this message through our relay:\n\n` +
+    `"${finderMessage}"` +
+    finderLine +
+    `\n\nTime: ${when}`;
+
+  const finderShort = finderMessage.slice(0, 200);
+
+  if (isWhatsAppConfigured) {
+    const tpl = await sendScanAlertTemplate(toE164, itemLabel, finderShort, when);
+    if (tpl.ok) return tpl;
+
+    const direct = await sendWhatsAppMessage(toE164, body);
+    if (direct.ok) return direct;
+
+    return {
+      ok: false,
+      error: [tpl.error, direct.error].filter(Boolean).join(' · '),
+    };
+  }
+
+  return sendWhatsAppMessage(toE164, body);
+}

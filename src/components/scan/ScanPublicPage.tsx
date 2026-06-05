@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { ScanBeacon } from '@/components/scan/ScanBeacon';
 import { ContactForm } from '@/components/scan/ContactForm';
 import { ScanActionsBar } from '@/components/scan/ScanActionsBar';
+import { env } from '@/lib/env';
 import { formatPkr } from '@/lib/constants';
 import { BRAND_NAME } from '@/lib/brand';
 import { productTypeLabel, type ProductType } from '@/lib/product-type';
@@ -141,14 +142,16 @@ export async function ScanPublicPage({ slug }: { slug: string }) {
         <div className="mt-1 font-display text-xl text-ink">{view.publicName ?? 'Owner'}</div>
         <div className="mt-2 font-mono tnum text-ink-soft">{view.ownerPhoneMasked}</div>
         <p className="mt-2 text-xs text-ink-muted">
-          The real number is masked. You can still reach out using the buttons below or send a secure message through{' '}
-          {BRAND_NAME}.
+          {view.isPhoneNumberAllow
+            ? 'This is not the owner&apos;s real number on this page. Use WhatsApp or the message form below.'
+            : 'This is not the owner&apos;s real number. Send a message below and we will relay it from our company WhatsApp.'}
         </p>
       </div>
 
       <ScanActionsBar
-        telHref={view.contactLinks?.tel}
-        whatsappHref={view.contactLinks?.whatsappHref}
+        isPhoneNumberAllow={view.isPhoneNumberAllow ?? false}
+        whatsappHref={view.whatsappHref}
+        companyContactPhone={env.NEXT_PUBLIC_COMPANY_CONTACT_PHONE ?? null}
       />
 
       {isLost && view.rewardPkr ? (
@@ -163,7 +166,13 @@ export async function ScanPublicPage({ slug }: { slug: string }) {
       ) : null}
 
       <div className="mt-8">
-        <ContactForm uid={slug} isLost={isLost} productType={view.productType} />
+        <ContactForm
+          uid={slug}
+          isLost={isLost}
+          productType={view.productType}
+          relayMode={!(view.isPhoneNumberAllow ?? false)}
+          companyContactPhone={env.NEXT_PUBLIC_COMPANY_CONTACT_PHONE ?? null}
+        />
       </div>
 
       <p className="mt-8 text-center text-xs text-ink-muted">

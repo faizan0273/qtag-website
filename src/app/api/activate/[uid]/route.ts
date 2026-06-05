@@ -5,8 +5,10 @@ import { isValidUid } from '@/lib/uid';
 import { getCurrentUser } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { TagModel } from '@/models/Tag';
+import { UserModel } from '@/models/User';
 import { activateQR } from '@/lib/services/qr-product.service';
 import { normalizeProductType } from '@/lib/product-type';
+import { resolveDevTagUid } from '@/lib/dev-test-tags';
 export const dynamic = 'force-dynamic';
 
 
@@ -18,9 +20,15 @@ export const dynamic = 'force-dynamic';
  *  - DASHBOARD tags: same user who created the UID can activate without an order.
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ uid: string }> }) {
-  const { uid } = await params;
+  const { uid: rawUid } = await params;
+  const uid = resolveDevTagUid(rawUid);
   return safe(async () => {
-    if (!isValidUid(uid)) return bad('NOT_FOUND', 'This tag does not exist.');
+    if (!isValidUid(uid)) {
+      return bad(
+        'NOT_FOUND',
+        'This tag code is not valid. Scan a current test QR from /dev/qr or check the code on your sticker.',
+      );
+    }
 
     const user = await getCurrentUser();
     if (!user) return bad('UNAUTHORIZED', 'Please sign in to activate.');
@@ -61,6 +69,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ uid
 
     if (!result.ok) {
       return bad(result.code, result.message);
+    }
+
+    if (typeof body.isPhoneNumberAllow === 'boolean') {
+      await UserModel.findByIdAndUpdate(user._id, { isPhoneNumberAllow: body.isPhoneNumberAllow });
     }
 
     return ok({ tag: result.tag });
